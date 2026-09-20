@@ -1,0 +1,2903 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoVideo AI Studio - Automated Queue & Studio</title>
+    <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Padauk:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Background & Page Gradients */
+            --bg-page: #f8fafc;
+            --bg-page-gradient: radial-gradient(circle at 10% 10%, rgba(124, 58, 237, 0.08) 0%, transparent 45%),
+                                radial-gradient(circle at 90% 90%, rgba(168, 85, 247, 0.08) 0%, transparent 45%),
+                                linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+
+            /* White Liquid Glass Surfaces */
+            --glass-surface: rgba(255, 255, 255, 0.72);
+            --glass-surface-hover: rgba(255, 255, 255, 0.88);
+            --glass-card-opaque: rgba(255, 255, 255, 0.94);
+            --glass-border: rgba(255, 255, 255, 0.85);
+            --glass-border-subtle: rgba(226, 232, 240, 0.8);
+            --glass-shadow: 0 10px 30px -5px rgba(31, 38, 135, 0.07), 0 4px 12px 0 rgba(0, 0, 0, 0.03);
+            --glass-shadow-hover: 0 15px 35px -5px rgba(124, 58, 237, 0.12), 0 6px 16px 0 rgba(0, 0, 0, 0.04);
+            --glass-blur: blur(20px);
+
+            /* Soft Purple / Violet Accents */
+            --accent-primary: #7c3aed;
+            --accent-secondary: #8b5cf6;
+            --accent-light: rgba(124, 58, 237, 0.08);
+            --accent-light-border: rgba(124, 58, 237, 0.2);
+            --accent-gradient: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            --accent-gradient-hover: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+            --accent-glow: 0 8px 25px -6px rgba(124, 58, 237, 0.35);
+
+            /* High-Contrast Typography */
+            --text-main: #0f172a;
+            --text-heading: #020617;
+            --text-muted: #64748b;
+            --text-subtle: #94a3b8;
+
+            /* Status Indicators */
+            --success: #10b981;
+            --success-bg: rgba(16, 185, 129, 0.12);
+            --success-border: rgba(16, 185, 129, 0.3);
+            --warning: #f59e0b;
+            --warning-bg: rgba(245, 158, 11, 0.12);
+            --danger: #ef4444;
+            --danger-bg: rgba(239, 68, 68, 0.12);
+            --danger-border: rgba(239, 68, 68, 0.3);
+
+            /* Radii */
+            --radius-xl: 24px;
+            --radius-lg: 18px;
+            --radius-md: 12px;
+            --radius-sm: 8px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Plus Jakarta Sans', 'Padauk', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-page);
+            background-image: var(--bg-page-gradient);
+            background-attachment: fixed;
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 1.5rem 1rem;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 980px;
+            margin: 0 auto;
+        }
+
+        /* Top Navbar */
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+            padding: 0.85rem 1.35rem;
+            background: var(--glass-surface);
+            backdrop-filter: var(--glass-blur);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            box-shadow: var(--glass-shadow);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .brand-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 14px;
+            background: var(--accent-gradient);
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.35rem;
+            box-shadow: var(--accent-glow);
+        }
+
+        .brand-text h1 {
+            font-size: 1.3rem;
+            font-weight: 800;
+            letter-spacing: -0.01em;
+            color: var(--text-heading);
+        }
+
+        .brand-text p {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.8rem;
+            padding: 6px 14px;
+            border-radius: 20px;
+            background: var(--success-bg);
+            border: 1px solid var(--success-border);
+            color: #059669;
+            font-weight: 600;
+        }
+
+        .dot-ping {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #10b981;
+            box-shadow: 0 0 8px #10b981;
+        }
+
+        .btn-settings {
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid var(--glass-border-subtle);
+            color: var(--text-main);
+            padding: 8px 16px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.88rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: var(--glass-shadow);
+            transition: all 0.2s ease;
+        }
+
+        .btn-settings:hover {
+            background: #ffffff;
+            border-color: var(--accent-secondary);
+            color: var(--accent-primary);
+            box-shadow: var(--glass-shadow-hover);
+        }
+
+        /* Main Glass Card */
+        .card {
+            background: var(--glass-surface);
+            backdrop-filter: var(--glass-blur);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-xl);
+            padding: 1.75rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--glass-shadow);
+            transition: all 0.25s ease;
+        }
+
+        .card:hover {
+            box-shadow: var(--glass-shadow-hover);
+        }
+
+        .input-row {
+            display: flex;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .input-url {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid var(--glass-border-subtle);
+            border-radius: 14px;
+            padding: 14px 18px;
+            color: var(--text-main);
+            font-size: 0.95rem;
+            outline: none;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
+            transition: all 0.2s ease;
+        }
+
+        .input-url:focus {
+            border-color: var(--accent-secondary);
+            box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.15);
+            background: #ffffff;
+        }
+
+        .btn-primary {
+            background: var(--accent-gradient);
+            border: none;
+            color: #ffffff;
+            padding: 14px 26px;
+            border-radius: 14px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: var(--accent-glow);
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-gradient-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 12px 30px -6px rgba(124, 58, 237, 0.5);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid var(--glass-border-subtle);
+            color: var(--text-main);
+            padding: 8px 16px;
+            border-radius: 10px;
+            font-size: 0.83rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+            transition: all 0.2s ease;
+        }
+
+        .btn-secondary:hover {
+            background: #ffffff;
+            border-color: var(--accent-secondary);
+            color: var(--accent-primary);
+        }
+
+        /* Queue Dashboard Sections */
+        .queue-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: var(--glass-blur);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 14px 16px;
+            text-align: center;
+            box-shadow: var(--glass-shadow);
+        }
+
+        .stat-val {
+            font-size: 1.6rem;
+            font-weight: 800;
+            margin-top: 2px;
+        }
+
+        .stat-lbl {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 600;
+        }
+
+        /* Active Job Card */
+        .active-job-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: var(--glass-blur);
+            border: 1.5px solid var(--accent-light-border);
+            border-radius: 20px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 15px 35px -5px rgba(124, 58, 237, 0.15);
+        }
+
+        .progress-bar-bg {
+            height: 10px;
+            background: rgba(226, 232, 240, 0.7);
+            border-radius: 5px;
+            margin: 1rem 0;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: var(--accent-gradient);
+            width: 0%;
+            transition: width 0.4s ease;
+            border-radius: 5px;
+        }
+
+        /* Job Card Item */
+        .job-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .job-card {
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid var(--glass-border-subtle);
+            border-radius: 14px;
+            padding: 1.1rem 1.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
+            transition: all 0.2s ease;
+        }
+
+        .job-card:hover {
+            border-color: var(--accent-light-border);
+            box-shadow: 0 8px 25px rgba(124, 58, 237, 0.08);
+        }
+
+        .job-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .job-title {
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: var(--text-heading);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .job-meta {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 3px;
+        }
+
+        .badge-status {
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 20px;
+            text-transform: uppercase;
+        }
+
+        .badge-queued { background: rgba(100, 116, 139, 0.12); color: #475569; }
+        .badge-processing { background: var(--accent-light); color: var(--accent-primary); }
+        .badge-completed { background: var(--success-bg); color: #059669; }
+        .badge-failed { background: var(--danger-bg); color: #dc2626; }
+
+        /* Modal & Segmented Pill Tabs */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.35);
+            backdrop-filter: blur(16px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 1.5rem;
+        }
+
+        .modal-card {
+            background: rgba(255, 255, 255, 0.88);
+            backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            border-radius: 24px;
+            width: 100%;
+            max-width: 780px;
+            max-height: 88vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 25px 60px -15px rgba(31, 38, 135, 0.15);
+            overflow: hidden;
+        }
+
+        .modal-header {
+            padding: 1.25rem 1.75rem;
+            border-bottom: 1px solid rgba(226, 232, 240, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        .modal-body {
+            padding: 1.5rem 1.75rem;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .modal-tabs {
+            display: flex;
+            gap: 6px;
+            border-bottom: 1px solid rgba(226, 232, 240, 0.7);
+            padding: 0.75rem 1.5rem;
+            background: rgba(241, 245, 249, 0.6);
+            overflow-x: auto;
+        }
+
+        .tab-btn {
+            padding: 10px 18px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            border-radius: 12px;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .tab-btn:hover {
+            color: var(--accent-primary);
+            background: rgba(124, 58, 237, 0.06);
+        }
+
+        .tab-btn.active {
+            color: #ffffff;
+            background: var(--accent-gradient);
+            box-shadow: 0 4px 14px rgba(124, 58, 237, 0.35);
+            font-weight: 700;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: var(--text-main);
+        }
+
+        .form-input, select, textarea {
+            width: 100%;
+            background: #ffffff;
+            border: 1px solid rgba(203, 213, 225, 0.9);
+            border-radius: 12px;
+            padding: 10px 14px;
+            color: var(--text-main);
+            font-size: 0.9rem;
+            outline: none;
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.02);
+            transition: all 0.2s ease;
+        }
+
+        .form-input:focus, select:focus, textarea:focus {
+            border-color: var(--accent-secondary);
+            box-shadow: 0 0 0 3.5px rgba(139, 92, 246, 0.15);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 90px;
+            font-family: monospace;
+            font-size: 0.82rem;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(124, 58, 237, 0.2);
+            border-top-color: var(--accent-primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Color Swatch Grid */
+        .color-swatch-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 6px;
+            margin-top: 6px;
+        }
+
+        .color-swatch-btn {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            background: #ffffff;
+            border: 1px solid rgba(203, 213, 225, 0.8);
+            border-radius: 10px;
+            padding: 6px 8px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-main);
+            transition: all 0.2s ease;
+            user-select: none;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+        }
+
+        .color-swatch-btn:hover {
+            border-color: var(--accent-secondary);
+            background: rgba(124, 58, 237, 0.05);
+        }
+
+        .color-swatch-btn.active {
+            border-color: var(--accent-primary);
+            background: rgba(124, 58, 237, 0.1);
+            box-shadow: 0 0 0 1.5px var(--accent-primary);
+            color: var(--accent-primary);
+            font-weight: 700;
+        }
+
+        /* Responsive Layout Adjustments for Mobile Views */
+        @media (max-width: 768px) {
+            body {
+                padding: 0.75rem 0.5rem;
+            }
+            header {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 12px;
+                padding: 1rem;
+                border-radius: 18px;
+            }
+            .header-actions {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                width: 100%;
+            }
+            .btn-settings {
+                padding: 8px 14px;
+                font-size: 0.85rem;
+            }
+            .brand {
+                gap: 10px;
+            }
+            .brand-icon {
+                width: 38px;
+                height: 38px;
+                font-size: 1.2rem;
+            }
+            .brand-text h1 {
+                font-size: 1.15rem;
+            }
+            .brand-text p {
+                font-size: 0.75rem;
+            }
+            .input-row {
+                flex-direction: column;
+                gap: 8px;
+            }
+            .input-url {
+                width: 100%;
+                font-size: 0.9rem;
+                padding: 12px 14px;
+            }
+            .btn-primary {
+                width: 100%;
+                padding: 12px 18px;
+                font-size: 0.9rem;
+                justify-content: center;
+            }
+            .queue-stats-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 10px;
+            }
+            .stat-card {
+                padding: 10px 12px;
+            }
+            .stat-val {
+                font-size: 1.35rem;
+            }
+            .stat-lbl {
+                font-size: 0.72rem;
+            }
+            .modal-overlay {
+                padding: 0.25rem;
+            }
+            .modal-card {
+                width: 100% !important;
+                max-width: 100% !important;
+                max-height: 95vh !important;
+                border-radius: 18px !important;
+                margin: 0 !important;
+            }
+            .modal-header {
+                padding: 1rem 1.2rem;
+            }
+            .modal-body {
+                padding: 1rem;
+            }
+            .modal-footer {
+                padding: 0.85rem 1.2rem;
+                flex-direction: column-reverse;
+                gap: 8px;
+            }
+            .modal-footer button {
+                width: 100%;
+            }
+            .modal-tabs {
+                overflow-x: auto;
+                white-space: nowrap;
+                flex-wrap: nowrap !important;
+                -webkit-overflow-scrolling: touch;
+                padding-bottom: 6px;
+                gap: 6px;
+            }
+            .tab-btn {
+                flex: 0 0 auto !important;
+                padding: 8px 14px !important;
+                font-size: 0.82rem !important;
+            }
+            .form-row {
+                grid-template-columns: 1fr !important;
+                gap: 10px;
+            }
+            .tab-subtitle-grid {
+                grid-template-columns: 1fr !important;
+                gap: 16px;
+            }
+            #previewCanvasContainer {
+                width: 220px !important;
+                height: 391px !important;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .queue-stats-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+            }
+            .job-actions {
+                flex-wrap: wrap;
+                gap: 6px;
+            }
+            .job-actions button {
+                flex: 1 1 auto;
+            }
+        }
+
+        /* White Liquid Glass Global Toast Notifications */
+        .toast-container {
+            position: fixed !important;
+            top: 20px !important;
+            right: 20px !important;
+            z-index: 99999 !important;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            pointer-events: none;
+            width: min(380px, calc(100vw - 40px));
+        }
+
+        .toast-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            border-radius: 16px;
+            padding: 12px 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.10);
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            pointer-events: auto;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            animation: toastSlideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .toast-card.toast-leaving {
+            opacity: 0;
+            transform: translateX(60px);
+            margin-top: -50px;
+        }
+
+        .toast-card.toast-success { border-left: 4px solid #10b981; }
+        .toast-card.toast-info { border-left: 4px solid #7c3aed; }
+        .toast-card.toast-warning { border-left: 4px solid #f59e0b; }
+        .toast-card.toast-error { border-left: 4px solid #ef4444; }
+
+        .toast-icon-badge {
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            font-weight: 800;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        .toast-success .toast-icon-badge { background: rgba(16, 185, 129, 0.12); color: #059669; }
+        .toast-info .toast-icon-badge { background: rgba(124, 58, 237, 0.12); color: #7c3aed; }
+        .toast-warning .toast-icon-badge { background: rgba(245, 158, 11, 0.12); color: #d97706; }
+        .toast-error .toast-icon-badge { background: rgba(239, 68, 68, 0.12); color: #dc2626; }
+
+        .toast-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .toast-title {
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: var(--text-heading);
+            margin-bottom: 2px;
+            line-height: 1.25;
+        }
+
+        .toast-message {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            line-height: 1.35;
+            word-break: break-word;
+        }
+
+        .toast-close-btn {
+            background: transparent;
+            border: none;
+            color: #94a3b8;
+            font-size: 1.1rem;
+            line-height: 1;
+            cursor: pointer;
+            padding: 2px 4px;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .toast-close-btn:hover {
+            color: #475569;
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        @keyframes toastSlideIn {
+            from {
+                opacity: 0;
+                transform: translateX(60px) scale(0.98);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0) scale(1);
+            }
+        }
+
+        /* Reusable Liquid Glass Confirmation Modal */
+        .confirm-modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(20, 20, 40, 0.35);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 100000;
+            padding: 1.5rem;
+            animation: confirmFadeIn 0.2s ease forwards;
+        }
+
+        .confirm-modal-card {
+            background: rgba(255, 255, 255, 0.88);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.95);
+            border-radius: 24px;
+            padding: 2rem 2.25rem;
+            max-width: 420px;
+            width: 100%;
+            box-shadow: 0 25px 60px -15px rgba(31, 38, 135, 0.22), 0 10px 25px rgba(0, 0, 0, 0.08);
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transform: scale(0.94);
+            animation: confirmScaleUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        .confirm-modal-badge {
+            width: 52px;
+            height: 52px;
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1.1rem;
+            background: rgba(239, 68, 68, 0.12);
+            color: #ef4444;
+            box-shadow: 0 8px 20px rgba(239, 68, 68, 0.15);
+        }
+
+        .confirm-modal-title {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: var(--text-heading);
+            margin-bottom: 0.5rem;
+        }
+
+        .confirm-modal-msg {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            line-height: 1.45;
+            margin-bottom: 1.75rem;
+        }
+
+        .confirm-modal-actions {
+            display: flex;
+            gap: 12px;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .confirm-btn {
+            flex: 1;
+            padding: 11px 18px;
+            border-radius: 14px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+        }
+
+        .confirm-btn-cancel {
+            background: rgba(241, 245, 249, 0.8);
+            color: #475569;
+            border-color: rgba(203, 213, 225, 0.8);
+        }
+
+        .confirm-btn-cancel:hover {
+            background: rgba(226, 232, 240, 0.9);
+            color: #1e293b;
+        }
+
+        .confirm-btn-danger {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: #ffffff;
+            box-shadow: 0 8px 20px rgba(239, 68, 68, 0.3);
+        }
+
+        .confirm-btn-danger:hover {
+            box-shadow: 0 10px 25px rgba(239, 68, 68, 0.45);
+            transform: translateY(-1px);
+        }
+
+        @keyframes confirmFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes confirmScaleUp {
+            from { opacity: 0; transform: scale(0.92); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        @media (max-width: 600px) {
+            .toast-container {
+                top: 12px !important;
+                right: 12px !important;
+                left: 12px !important;
+                width: calc(100vw - 24px) !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="toastContainer" class="toast-container"></div>
+    
+    <!-- Reusable White Liquid Glass Confirmation Modal -->
+    <div id="confirmModalOverlay" class="confirm-modal-overlay" tabindex="-1">
+        <div class="confirm-modal-card" role="dialog" aria-modal="true" aria-labelledby="confirmModalTitle" aria-describedby="confirmModalMsg">
+            <div id="confirmModalBadge" class="confirm-modal-badge">⚠️</div>
+            <h3 id="confirmModalTitle" class="confirm-modal-title">Remove Video?</h3>
+            <p id="confirmModalMsg" class="confirm-modal-msg">Remove this job record from queue history?</p>
+            <div class="confirm-modal-actions">
+                <button id="confirmCancelBtn" class="confirm-btn confirm-btn-cancel" type="button">Cancel</button>
+                <button id="confirmActionBtn" class="confirm-btn confirm-btn-danger" type="button">Remove</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Top Navbar -->
+        <header>
+            <div class="brand">
+                <div class="brand-icon">⚡</div>
+                <div class="brand-text">
+                    <h1>AutoVideo AI Studio</h1>
+                    <p>Automated Background Video Processing & Translation Queue</p>
+                </div>
+            </div>
+            <div class="header-actions">
+                <div class="status-badge">
+                    <div class="dot-ping"></div>
+                    <span>Worker Running</span>
+                </div>
+                <button class="btn-settings" onclick="openSettingsModal()">⚙️ Settings</button>
+            </div>
+        </header>
+
+        <!-- Quick Add Section -->
+        <div class="card">
+            <h2 style="font-size: 1.1rem; margin-bottom: 6px; color: var(--text-heading);">📌 Paste Video URL to Process</h2>
+            <p style="font-size: 0.83rem; color: var(--text-muted); margin-bottom: 12px;">
+                URL ထည့်ပြီး Queue သို့ ထည့်လိုက်ပါ၊ ကျန်သည့် Process အားလုံး နောက်ကွယ် (background) တွင် အလိုအလျောက် ပြီးမြောက်သွားပါမည်။
+            </p>
+            <div class="input-row">
+                <input type="url" id="videoUrlInput" class="input-url" placeholder="https://www.youtube.com/watch?v=..." onkeydown="if(event.key === 'Enter') addVideoToQueue()">
+                <button class="btn-primary" onclick="addVideoToQueue()">
+                    <span>+ ADD TO QUEUE</span>
+                </button>
+            </div>
+            <div id="urlMessageBanner" style="display:none; margin-top:10px; font-size:0.83rem; padding:8px 12px; border-radius:8px;"></div>
+        </div>
+
+        <!-- Queue Summary Stats -->
+        <div class="queue-stats-grid">
+            <div class="stat-card">
+                <div class="stat-lbl">Active Processing</div>
+                <div class="stat-val" id="statActive" style="color: var(--accent-primary);">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-lbl">Waiting Queue</div>
+                <div class="stat-val" id="statQueued" style="color: var(--text-muted);">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-lbl">Completed</div>
+                <div class="stat-val" id="statCompleted" style="color: #059669;">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-lbl">Failed</div>
+                <div class="stat-val" id="statFailed" style="color: #dc2626;">0</div>
+            </div>
+        </div>
+
+        <!-- Active Processing Job Banner -->
+        <div id="activeJobSection" style="display: none;">
+            <div class="active-job-card">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                    <div>
+                        <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--accent-primary); font-weight: 700; letter-spacing: 0.05em;">⚡ Currently Processing in Background</div>
+                        <h3 style="font-size: 1.15rem; color: var(--text-heading); margin-top: 4px;" id="activeJobTitle">Processing...</h3>
+                    </div>
+                    <button class="btn-secondary" onclick="cancelActiveJob()" style="background: rgba(239, 68, 68, 0.1); color: #dc2626; border-color: rgba(239, 68, 68, 0.25);">Stop / Cancel</button>
+                </div>
+
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" id="activeJobProgressFill"></div>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem;">
+                    <div style="color: var(--text-main); display: flex; align-items: center; gap: 8px;">
+                        <div class="spinner"></div>
+                        <span id="activeJobStageMsg">Preparing...</span>
+                    </div>
+                    <div style="font-weight: 700; color: var(--accent-primary);" id="activeJobPercent">0%</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Waiting Queue Section -->
+        <div class="card" style="margin-bottom: 1.5rem;">
+            <h3 style="font-size: 1rem; color: var(--text-heading); margin-bottom: 1rem;">⏳ Waiting Queue</h3>
+            <div id="waitingQueueList" class="job-list">
+                <div style="text-align: center; padding: 1.5rem; color: var(--text-muted); font-size: 0.88rem;">No videos currently waiting in queue.</div>
+            </div>
+        </div>
+
+        <!-- Completed Videos Section -->
+        <div class="card" style="margin-bottom: 1.5rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h3 style="font-size: 1rem; color: var(--text-heading);">✓ Completed Videos</h3>
+                <button class="btn-secondary" onclick="clearCompletedJobs()" style="font-size: 0.78rem;">Clear Completed List</button>
+            </div>
+            <div id="completedQueueList" class="job-list">
+                <div style="text-align: center; padding: 1.5rem; color: var(--text-muted); font-size: 0.88rem;">No completed video outputs yet.</div>
+            </div>
+        </div>
+
+        <!-- Failed Videos Section -->
+        <div class="card">
+            <h3 style="font-size: 1rem; color: var(--text-heading); margin-bottom: 1rem;">✕ Failed Jobs</h3>
+            <div id="failedQueueList" class="job-list">
+                <div style="text-align: center; padding: 1.5rem; color: var(--text-muted); font-size: 0.88rem;">No failed video jobs.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal-overlay" id="settingsModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h2 style="font-size: 1.2rem; color: var(--text-heading); font-weight: 700;">⚙️ AutoVideo AI Studio Configuration</h2>
+                <button class="btn-secondary" onclick="closeSettingsModal()">✕ Close</button>
+            </div>
+
+            <!-- Settings Tabs -->
+            <div class="modal-tabs">
+                <button class="tab-btn active" onclick="switchSettingsTab('tabAi')">🤖 AI & Prompts</button>
+                <button class="tab-btn" onclick="switchSettingsTab('tabTranslation')">🎭 Translation</button>
+                <button class="tab-btn" onclick="switchSettingsTab('tabVoice')">🎙️ Voice & TTS</button>
+                <button class="tab-btn" onclick="switchSettingsTab('tabSubtitle')">🎨 Subtitles</button>
+                <button class="tab-btn" onclick="switchSettingsTab('tabVideo')">🎬 Video & GPU</button>
+                <button class="tab-btn" onclick="switchSettingsTab('tabAutomation')">⚙️ Automation</button>
+            </div>
+
+            <div class="modal-body">
+                <!-- Tab 1: AI & Prompts -->
+                <div class="tab-content active" id="tabAi">
+                    <div class="form-group">
+                        <label class="form-label">AI Provider</label>
+                        <select id="setAiProvider">
+                            <option value="gemini">Google Gemini (Gemini 2.5 Flash)</option>
+                            <option value="openai">OpenAI (GPT-4o Mini)</option>
+                        </select>
+                    </div>
+
+                    <!-- Multi-Groq-API-Key Management Component (White Liquid Glass Style) -->
+                    <div class="form-group" style="background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.85); border-radius: 14px; padding: 18px; box-shadow: 0 4px 20px rgba(124, 58, 237, 0.05); margin-bottom: 20px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                            <div>
+                                <label class="form-label" style="font-weight: 700; color: #4c1d95; margin: 0; font-size: 1.05rem;">
+                                    🔑 Groq API Keys (Whisper Multi-Key Failover)
+                                </label>
+                                <div style="font-size: 0.78rem; color: #6b7280; margin-top: 2px;">
+                                    Sticky Active Key with automatic failover rotation on 429 rate limit
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-primary btn-sm" onclick="openAddGroqKeyModal()" style="border-radius: 8px; font-size: 0.8rem; background: linear-gradient(135deg, #7c3aed, #6d28d9); border: none; padding: 6px 12px;">
+                                + Add Groq API Key
+                            </button>
+                        </div>
+                        
+                        <div id="groqKeysListContainer" style="display: flex; flex-direction: column; gap: 10px;">
+                            <!-- Populated dynamically via JavaScript -->
+                        </div>
+
+                        <input type="hidden" id="setGroqApiKey" value="">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Gemini API Key</label>
+                        <input type="password" id="setGeminiApiKey" class="form-input" placeholder="AIzaSy...">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">OpenAI API Key (Optional)</label>
+                        <input type="password" id="setOpenAiApiKey" class="form-input" placeholder="sk-proj-...">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">📝 AI System Prompt (Editable Instructions)</label>
+                        <textarea id="setAiSystemPrompt"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">📝 Translation Prompt</label>
+                        <textarea id="setTranslationPrompt"></textarea>
+                    </div>
+                </div>
+
+                <!-- Tab 2: Translation -->
+                <div class="tab-content" id="tabTranslation">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Target Language</label>
+                            <input type="text" id="setTargetLanguage" class="form-input" value="Burmese">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Translation Style (Tone)</label>
+                            <select id="setTranslationStyle">
+                                <option value="documentary">📚 မူရင်း / Documentary</option>
+                                <option value="comedy">😂 ဟာသ စတိုင် (Comedy)</option>
+                                <option value="sad">😢 အလွမ်းအဆွေး (Drama)</option>
+                                <option value="emotional">💖 Emotional စတိုင်</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            <input type="checkbox" id="setScriptRewritingEnabled">
+                            Enable AI Viral Script Rewriting
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Tab 3: Voice & TTS -->
+                <div class="tab-content" id="tabVoice">
+                    <div class="form-group">
+                        <label class="form-label">TTS Engine Selection</label>
+                        <select id="setVoiceEngine" onchange="toggleVoiceEngineUI()">
+                            <option value="edge_tts">🌐 Microsoft Edge TTS (Neural)</option>
+                            <option value="voice_clone">⚡ VoxCPM2 (GPU Voice Clone)</option>
+                        </select>
+                    </div>
+
+                    <!-- Edge TTS Section -->
+                    <div id="edgeTtsControls">
+                        <div class="form-group">
+                            <label class="form-label">Microsoft Edge Voice Selection</label>
+                            <select id="setEdgeTtsVoice">
+                                <option value="my-MM-NilarNeural">မြန်မာ အမျိုးသမီး (Nilar) - my-MM</option>
+                                <option value="my-MM-ThihaNeural">မြန်မာ အမျိုးသား (Thiha) - my-MM</option>
+                                <option value="en-US-AvaNeural">English Female (Ava) - en-US</option>
+                                <option value="en-US-AndrewNeural">English Male (Andrew) - en-US</option>
+                            </select>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Edge TTS Pitch (Default: +1.2)</label>
+                                <input type="text" id="setEdgeTtsPitch" class="form-input" value="+1.2" placeholder="+1.2">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Edge TTS Speed (Default: 1.0)</label>
+                                <input type="number" step="0.1" id="setEdgeTtsSpeed" class="form-input" value="1.0">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Voice Clone Section (VoxCPM2) -->
+                    <div id="voiceCloneControls" style="display:none;">
+                        <div class="form-group">
+                            <label class="form-label">Voice Selection</label>
+                            <select id="setVoiceCloneName">
+                                <option value="">-- No Custom Voices Available (+ Add New Voice Reference Below) --</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Voice Clone Pitch</label>
+                            <input type="text" id="setVoiceClonePitch" class="form-input" value="0 / Original Pitch (Fixed)" disabled style="opacity:0.7; cursor:not-allowed;">
+                        </div>
+
+                        <!-- Add New Reference Upload Button & Panel -->
+                        <div style="margin-top:12px; padding:14px; background:rgba(255,255,255,0.85); border:1px dashed var(--accent-secondary); border-radius:14px; box-shadow:0 2px 8px rgba(0,0,0,0.02);">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <span style="font-size:0.85rem; font-weight:700; color:var(--text-heading);">🎙️ Voice Reference Library</span>
+                                <button type="button" class="btn-secondary" onclick="toggleAddRefPanel()" style="font-size:0.78rem;">+ Add New Voice Reference</button>
+                            </div>
+
+                            <div id="addRefPanel" style="display:none; margin-top:12px; padding-top:12px; border-top:1px solid rgba(226,232,240,0.8);">
+                                <div class="form-group">
+                                    <label class="form-label">Reference Voice Name</label>
+                                    <input type="text" id="newRefName" class="form-input" placeholder="e.g. My Voice 01">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Reference Audio File (.wav or .mp3)</label>
+                                    <input type="file" id="newRefFile" accept="audio/*" class="form-input">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Exact Spoken Words in Audio (Reference Text)</label>
+                                    <textarea id="newRefText" placeholder="Enter the exact Burmese/English sentence spoken in this audio file..."></textarea>
+                                </div>
+                                <button type="button" class="btn-primary" onclick="saveNewVoiceReference()" style="width:100%; font-size:0.83rem;">💾 Save Voice Reference</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Audio Pipeline Quality Settings (Shared) -->
+                    <h4 style="font-size:0.9rem; color:var(--accent-primary); margin: 1.25rem 0 0.75rem 0;">🎧 Audio Pipeline & Assembly</h4>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Audio Quality / Sample Rate</label>
+                            <select id="setAudioQuality">
+                                <option value="high">Studio Quality (48000 Hz / High)</option>
+                                <option value="standard">Standard Quality (44100 Hz)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            <input type="checkbox" id="setAudioNormalization" checked>
+                            Loudness Normalization (Equalize segment volume)
+                        </label>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            <input type="checkbox" id="setSmoothSegmentJoin" checked>
+                            Smooth Segment Join (Crossfade segment boundary clicks)
+                        </label>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            <input type="checkbox" id="setSilenceCleanup" checked>
+                            Silence Cleanup (Trim accidental TTS padding)
+                        </label>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            <input type="checkbox" id="setAutoAudioValidation" checked>
+                            Auto Audio Validation (Verify track duration & stream)
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Tab 4: Subtitles -->
+                <div class="tab-content" id="tabSubtitle">
+                    <div class="tab-subtitle-grid" style="display: grid; grid-template-columns: 1fr 290px; gap: 20px; align-items: start;">
+                        <!-- Left Column: Controls -->
+                        <div>
+                            <div class="form-group">
+                                <label class="form-label">Preview Sample Text ( editable )</label>
+                                <input type="text" id="setSamplePreviewText" class="form-input" value="သစ်သားကို မြေတွင်းထဲထည့် မီးရှို့လိုက်တဲ့အခါ ဘာဖြစ်လာသလဲ။" oninput="updateSubtitleLivePreview()">
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                                        <label class="form-label" style="margin-bottom:0;">Font Family</label>
+                                        <button type="button" class="btn-secondary" onclick="triggerFontUpload()" style="font-size:0.75rem; padding:2px 8px; border-radius:6px;">+ Add Font</button>
+                                    </div>
+                                    <select id="setSubFontSelect" onchange="updateSubtitleLivePreview()">
+                                        <option value="Noto Sans Myanmar">Noto Sans Myanmar (Default)</option>
+                                        <option value="Pyidaungsu">Pyidaungsu</option>
+                                        <option value="Z10-Cartoon">Z10-Cartoon</option>
+                                    </select>
+                                    <input type="file" id="fontFileInput" accept=".ttf,.otf,.woff,.woff2" style="display:none;" onchange="uploadCustomFont(this)">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Font Size (1080p Canvas px)</label>
+                                    <input type="number" id="setSubFontSize" class="form-input" min="12" max="72" value="28" oninput="updateSubtitleLivePreview()">
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">Horizontal Alignment</label>
+                                    <select id="setSubAlignment" onchange="updateSubtitleLivePreview()">
+                                        <option value="center">Center</option>
+                                        <option value="left">Left</option>
+                                        <option value="right">Right</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Font Color</label>
+                                <div class="color-swatch-grid" id="colorSwatchGrid">
+                                    <button type="button" class="color-swatch-btn" data-color="#FFFFFF" onclick="selectFontColorPreset('#FFFFFF')">
+                                        <span class="color-dot" style="background:#FFFFFF;"></span>
+                                        <span>White</span>
+                                        <span class="swatch-check" style="display:none; margin-left:auto;">✓</span>
+                                    </button>
+                                    <button type="button" class="color-swatch-btn active" data-color="#FFD700" onclick="selectFontColorPreset('#FFD700')">
+                                        <span class="color-dot" style="background:#FFD700;"></span>
+                                        <span>Yellow</span>
+                                        <span class="swatch-check" style="display:inline; margin-left:auto;">✓</span>
+                                    </button>
+                                    <button type="button" class="color-swatch-btn" data-color="#EF4444" onclick="selectFontColorPreset('#EF4444')">
+                                        <span class="color-dot" style="background:#EF4444;"></span>
+                                        <span>Red</span>
+                                        <span class="swatch-check" style="display:none; margin-left:auto;">✓</span>
+                                    </button>
+                                    <button type="button" class="color-swatch-btn" data-color="#10B981" onclick="selectFontColorPreset('#10B981')">
+                                        <span class="color-dot" style="background:#10B981;"></span>
+                                        <span>Green</span>
+                                        <span class="swatch-check" style="display:none; margin-left:auto;">✓</span>
+                                    </button>
+                                    <button type="button" class="color-swatch-btn" data-color="#3B82F6" onclick="selectFontColorPreset('#3B82F6')">
+                                        <span class="color-dot" style="background:#3B82F6;"></span>
+                                        <span>Blue</span>
+                                        <span class="swatch-check" style="display:none; margin-left:auto;">✓</span>
+                                    </button>
+                                    <button type="button" class="color-swatch-btn" data-color="#F97316" onclick="selectFontColorPreset('#F97316')">
+                                        <span class="color-dot" style="background:#F97316;"></span>
+                                        <span>Orange</span>
+                                        <span class="swatch-check" style="display:none; margin-left:auto;">✓</span>
+                                    </button>
+                                    <button type="button" class="color-swatch-btn" data-color="#EC4899" onclick="selectFontColorPreset('#EC4899')">
+                                        <span class="color-dot" style="background:#EC4899;"></span>
+                                        <span>Pink</span>
+                                        <span class="swatch-check" style="display:none; margin-left:auto;">✓</span>
+                                    </button>
+                                    <button type="button" class="color-swatch-btn" data-color="#8B5CF6" onclick="selectFontColorPreset('#8B5CF6')">
+                                        <span class="color-dot" style="background:#8B5CF6;"></span>
+                                        <span>Purple</span>
+                                        <span class="swatch-check" style="display:none; margin-left:auto;">✓</span>
+                                    </button>
+                                    <button type="button" class="color-swatch-btn" data-color="#06B6D4" onclick="selectFontColorPreset('#06B6D4')">
+                                        <span class="color-dot" style="background:#06B6D4;"></span>
+                                        <span>Cyan</span>
+                                        <span class="swatch-check" style="display:none; margin-left:auto;">✓</span>
+                                    </button>
+                                    <button type="button" class="color-swatch-btn" id="customColorBtn" onclick="openCustomColorPicker()">
+                                        <span class="color-dot" id="customColorDot" style="background:conic-gradient(red, yellow, lime, cyan, blue, magenta, red);"></span>
+                                        <span>🎨 Custom</span>
+                                        <span class="swatch-check" id="customColorCheck" style="display:none; margin-left:auto;">✓</span>
+                                    </button>
+                                </div>
+
+                                <div id="customColorRow" style="display:none; margin-top:8px; align-items:center; gap:8px;">
+                                    <input type="color" id="setSubFontColorPicker" value="#FFD700" style="height:35px; width:50px; cursor:pointer;" oninput="onCustomColorInputChange(this.value)">
+                                    <input type="text" id="setSubFontColorHex" class="form-input" value="#FFD700" style="width:110px; font-family:monospace;" placeholder="#FFD700" oninput="onCustomColorHexInput(this.value)">
+                                    <span style="font-size:0.75rem; color:var(--text-muted);">Custom HEX</span>
+                                </div>
+                                <input type="hidden" id="setSubFontColor" value="#FFD700">
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">Outline Style</label>
+                                    <div style="display:flex; gap:8px; align-items:center;">
+                                        <input type="checkbox" id="setSubOutline" checked onchange="updateSubtitleLivePreview()">
+                                        <input type="color" id="setSubOutlineColor" style="height:35px; width:50px; cursor:pointer;" value="#000000" oninput="updateSubtitleLivePreview()">
+                                        <input type="number" id="setSubOutlineWidth" class="form-input" min="1" max="10" value="3" style="width:70px;" oninput="updateSubtitleLivePreview()">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Shadow Style</label>
+                                    <div style="display:flex; gap:8px; align-items:center;">
+                                        <input type="checkbox" id="setSubShadow" checked onchange="updateSubtitleLivePreview()">
+                                        <input type="number" id="setSubShadowStrength" class="form-input" min="1" max="10" value="2" style="width:70px;" oninput="updateSubtitleLivePreview()">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">Position Mode</label>
+                                    <select id="setSubPosition" onchange="onPositionModeChange()">
+                                        <option value="bottom">Bottom (Standard TikTok)</option>
+                                        <option value="center">Center</option>
+                                        <option value="top">Top</option>
+                                        <option value="custom">Custom (Drag & Drop / Coordinates)</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Bottom Margin / MarginV (px)</label>
+                                    <input type="number" id="setSubMarginV" class="form-input" min="0" max="800" value="120" oninput="updateSubtitleLivePreview()">
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">X Coordinate (1080 canvas)</label>
+                                    <input type="number" id="setSubX" class="form-input" placeholder="Auto (Center)" oninput="updateSubtitleLivePreview()">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Y Coordinate (1920 canvas)</label>
+                                    <input type="number" id="setSubY" class="form-input" placeholder="Auto" oninput="updateSubtitleLivePreview()">
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">Max Chars Per Line</label>
+                                    <input type="number" id="setMaxCharsPerLine" class="form-input" min="10" max="60" value="30" oninput="updateSubtitleLivePreview()">
+                                </div>
+                            </div>
+
+                            <div style="display:flex; gap:10px; margin-top:10px; align-items:center;">
+                                <button type="button" class="btn-secondary" onclick="resetSubtitlePosition()" style="font-size:0.8rem;">🔄 Reset Position</button>
+                                <label style="display:flex; align-items:center; gap:6px; font-size:0.83rem; cursor:pointer;">
+                                    <input type="checkbox" id="setShowSafeArea" checked onchange="updateSubtitleLivePreview()">
+                                    Show TikTok Safe Area Guide
+                                </label>
+                            </div>
+
+                            <div class="form-group" style="margin-top:12px;">
+                                <label class="form-label">
+                                    <input type="checkbox" id="setBurnSubtitles" checked>
+                                    Burn Subtitles into Output Video (NVENC FFmpeg)
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Right Column: 9:16 Vertical Video Preview -->
+                        <div>
+                            <div style="font-size: 0.78rem; font-weight: 700; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em; text-align: center;">
+                                📱 Real-Time 9:16 Preview (1080×1920)
+                            </div>
+                            
+                            <!-- 9:16 Aspect Ratio Canvas Container (270px x 480px) -->
+                            <div id="previewCanvasContainer" style="width:270px; height:480px; position:relative; margin:0 auto; background:linear-gradient(180deg, #1e1e2f 0%, #0f172a 100%); border:2px solid var(--accent-primary); border-radius:16px; overflow:hidden; user-select:none; box-shadow:0 8px 24px rgba(0,0,0,0.6);">
+                                
+                                <!-- TikTok Safe Area Overlay Guide -->
+                                <div id="safeAreaGuide" style="position:absolute; inset:0; pointer-events:none; z-index:10; display:block;">
+                                    <!-- Top Danger Zone -->
+                                    <div style="position:absolute; top:0; left:0; right:0; height:60px; background:rgba(239,68,68,0.18); border-bottom:1px dashed rgba(239,68,68,0.4); display:flex; align-items:center; justify-content:center; color:#f87171; font-size:0.65rem; font-weight:700;">Top Header UI Area</div>
+                                    <!-- Bottom Danger Zone -->
+                                    <div style="position:absolute; bottom:0; left:0; right:0; height:90px; background:rgba(239,68,68,0.18); border-top:1px dashed rgba(239,68,68,0.4); display:flex; align-items:center; justify-content:center; color:#f87171; font-size:0.65rem; font-weight:700;">TikTok Action Controls Zone</div>
+                                    <!-- Right Sidebar Danger Zone -->
+                                    <div style="position:absolute; right:0; top:60px; bottom:90px; width:45px; background:rgba(239,68,68,0.12); border-left:1px dashed rgba(239,68,68,0.3); display:flex; align-items:center; justify-content:center; color:#f87171; font-size:0.55rem; writing-mode:vertical-rl; font-weight:600;">Buttons</div>
+                                </div>
+
+                                <!-- Draggable Live Subtitle Box -->
+                                <div id="previewSubtitleBox" style="position:absolute; left:50%; transform:translateX(-50%); bottom:30px; width:90%; text-align:center; cursor:grab; z-index:20; padding:4px 6px; border:1px dashed transparent; transition:border-color 0.2s;" onmousedown="startSubtitleDrag(event)" ontouchstart="startSubtitleDrag(event)">
+                                    <span id="previewSubtitleText">သစ်သားကို မြေတွင်းထဲထည့် မီးရှို့လိုက်တဲ့အခါ ဘာဖြစ်လာသလဲ။</span>
+                                </div>
+                            </div>
+                            
+                            <div style="font-size:0.75rem; color:var(--text-muted); text-align:center; margin-top:8px;">
+                                💡 Drag subtitle inside preview to adjust position.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab 5: Video & GPU -->
+                <div class="tab-content" id="tabVideo">
+                    <div class="form-group">
+                        <label class="form-label">Resolution / Aspect Ratio</label>
+                        <select id="setResolution">
+                            <option value="1080x1920">1080x1920 (9:16 Vertical Shorts/Reels)</option>
+                            <option value="4k">4K Ultra HD (Highest Quality)</option>
+                            <option value="720">720p HD</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            <input type="checkbox" id="setGpuAcceleration">
+                            Enable RTX GPU NVENC Acceleration
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Tab 6: Automation -->
+                <div class="tab-content" id="tabAutomation">
+                    <div class="form-group">
+                        <label class="form-label">
+                            <input type="checkbox" id="setAutoStartNext">
+                            Auto-start Next Queued Video
+                        </label>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            <input type="checkbox" id="setAutoRetryFailed">
+                            Auto-retry Failed Jobs
+                        </label>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Max Retries Count</label>
+                        <input type="number" id="setMaxRetries" class="form-input" min="1" max="5" value="3">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            <input type="checkbox" id="setAutoCleanTemp">
+                            Auto Clean Temporary Files
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div style="padding: 1.25rem 1.75rem; border-top: 1px solid rgba(226, 232, 240, 0.8); display: flex; justify-content: flex-end; gap: 12px; background: rgba(255, 255, 255, 0.75);">
+                <button class="btn-secondary" onclick="closeSettingsModal()">Cancel</button>
+                <button class="btn-primary" onclick="saveSettingsFromModal()">
+                    <span>💾 SAVE SETTINGS</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add / Edit Groq Key Modal -->
+    <div id="groqKeyModal" class="modal-overlay" style="display: none; position: fixed; top:0; left:0; right:0; bottom:0; background: rgba(15, 23, 42, 0.5); backdrop-filter: blur(8px); z-index: 9999; justify-content: center; align-items: center;">
+        <div class="modal-content glass-card" style="max-width: 480px; width: 90%; background: rgba(255, 255, 255, 0.95); border-radius: 16px; padding: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.15); border: 1px solid rgba(255,255,255,0.8);">
+            <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h3 style="margin: 0; color: #4c1d95; font-size: 1.1rem; font-weight: 700;" id="groqKeyModalTitle">Add New Groq API Key</h3>
+                <button type="button" class="btn-close" onclick="closeGroqKeyModal()" style="background: none; border: none; font-size: 1.4rem; cursor: pointer; color: #6b7280;">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="modalGroqKeyId" value="">
+                <div class="form-group" style="margin-bottom: 14px;">
+                    <label class="form-label" style="font-size: 0.85rem; font-weight: 600; color: #374151;">Key Name / Label</label>
+                    <input type="text" id="modalGroqKeyName" class="form-input" placeholder="e.g. Groq Key 2">
+                </div>
+                <div class="form-group" style="margin-bottom: 14px;">
+                    <label class="form-label" style="font-size: 0.85rem; font-weight: 600; color: #374151;">Groq API Key (gsk_...)</label>
+                    <input type="password" id="modalGroqKeyValue" class="form-input" placeholder="Enter Groq API Key">
+                </div>
+                <div id="modalGroqKeyTestResult" style="margin-bottom: 14px; font-size: 0.85rem; font-weight: 600;"></div>
+            </div>
+            <div class="modal-footer" style="display: flex; justify-content: space-between; gap: 10px; margin-top: 20px;">
+                <button type="button" class="btn btn-secondary btn-sm" onclick="testModalGroqKey()">Test Connection</button>
+                <div style="display: flex; gap: 8px;">
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="closeGroqKeyModal()">Cancel</button>
+                    <button type="button" class="btn btn-primary btn-sm" onclick="saveModalGroqKey()" style="background: linear-gradient(135deg, #7c3aed, #6d28d9); border: none; color: white;">Save Key</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let allJobs = [];
+        let activeJobId = null;
+        let eventSource = null;
+
+        // Global Toast Notification System
+        const shownToastEventIds = new Set();
+        const trackedJobStatuses = new Map();
+        let isInitialQueueLoad = true;
+
+        function showToast(title, message, type = "info", duration = null, eventId = null) {
+            if (eventId) {
+                if (shownToastEventIds.has(eventId)) return;
+                shownToastEventIds.add(eventId);
+            }
+
+            const container = document.getElementById("toastContainer");
+            if (!container) return;
+
+            while (container.children.length >= 4) {
+                container.firstElementChild.remove();
+            }
+
+            if (!duration) {
+                if (type === "success" || type === "info") duration = 3000;
+                else if (type === "warning") duration = 4000;
+                else if (type === "error") duration = 6000;
+                else duration = 3000;
+            }
+
+            const icons = {
+                success: "✓",
+                info: "ℹ",
+                warning: "⚠️",
+                error: "✕"
+            };
+
+            const card = document.createElement("div");
+            card.className = `toast-card toast-${type}`;
+            card.innerHTML = `
+                <div class="toast-icon-badge">${icons[type] || "ℹ"}</div>
+                <div class="toast-content">
+                    <div class="toast-title">${escapeHtml(title)}</div>
+                    <div class="toast-message">${escapeHtml(message)}</div>
+                </div>
+                <button class="toast-close-btn" onclick="dismissToast(this.parentElement)">&times;</button>
+            `;
+
+            container.appendChild(card);
+
+            const timer = setTimeout(() => {
+                dismissToast(card);
+            }, duration);
+
+            card.dataset.timerId = timer;
+        }
+
+        function dismissToast(card) {
+            if (!card || card.classList.contains("toast-leaving")) return;
+            if (card.dataset.timerId) clearTimeout(parseInt(card.dataset.timerId));
+            card.classList.add("toast-leaving");
+            setTimeout(() => {
+                if (card && card.parentElement) card.parentElement.removeChild(card);
+            }, 300);
+        }
+
+        // Reusable White Liquid Glass Confirmation Modal Function
+        function showConfirmDialog({
+            title = "Remove Video?",
+            message = "Remove this job record from queue history?",
+            confirmText = "Remove",
+            cancelText = "Cancel",
+            type = "danger"
+        }) {
+            return new Promise((resolve) => {
+                const overlay = document.getElementById("confirmModalOverlay");
+                const titleEl = document.getElementById("confirmModalTitle");
+                const msgEl = document.getElementById("confirmModalMsg");
+                const cancelBtn = document.getElementById("confirmCancelBtn");
+                const actionBtn = document.getElementById("confirmActionBtn");
+                const badge = document.getElementById("confirmModalBadge");
+
+                if (!overlay) return resolve(false);
+
+                titleEl.innerText = title;
+                msgEl.innerText = message;
+                cancelBtn.innerText = cancelText;
+                actionBtn.innerText = confirmText;
+
+                if (type === "danger") {
+                    actionBtn.className = "confirm-btn confirm-btn-danger";
+                    badge.innerHTML = "⚠️";
+                    badge.style.background = "rgba(239, 68, 68, 0.12)";
+                    badge.style.color = "#ef4444";
+                } else {
+                    actionBtn.className = "confirm-btn btn-primary";
+                    badge.innerHTML = "ℹ️";
+                    badge.style.background = "rgba(124, 58, 237, 0.12)";
+                    badge.style.color = "#7c3aed";
+                }
+
+                overlay.style.display = "flex";
+                actionBtn.focus();
+
+                const cleanup = (result) => {
+                    overlay.style.display = "none";
+                    window.removeEventListener("keydown", handleKeyDown);
+                    overlay.removeEventListener("click", handleOverlayClick);
+                    cancelBtn.onclick = null;
+                    actionBtn.onclick = null;
+                    resolve(result);
+                };
+
+                const handleKeyDown = (e) => {
+                    if (e.key === "Escape") {
+                        cleanup(false);
+                    } else if (e.key === "Enter" && document.activeElement === cancelBtn) {
+                        cleanup(false);
+                    } else if (e.key === "Enter" && document.activeElement === actionBtn) {
+                        cleanup(true);
+                    }
+                };
+
+                const handleOverlayClick = (e) => {
+                    if (e.target === overlay) {
+                        cleanup(false);
+                    }
+                };
+
+                cancelBtn.onclick = () => cleanup(false);
+                actionBtn.onclick = () => cleanup(true);
+
+                window.addEventListener("keydown", handleKeyDown);
+                overlay.addEventListener("click", handleOverlayClick);
+            });
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            loadSavedSettings();
+            loadCustomVoicesAndFonts();
+            connectSSE();
+            fetchQueueJobs();
+        });
+
+        // Helper: HTML Escaping
+        function escapeHtml(str) {
+            if (str === null || str === undefined) return '';
+            return String(str)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        // Helper: Video Preview Toggle
+        function toggleVideoPreview(jobId) {
+            const container = document.getElementById(`video-player-${jobId}`);
+            const btn = document.getElementById(`btn-preview-${jobId}`);
+            if (!container) return;
+            if (container.style.display === "none" || !container.style.display) {
+                container.style.display = "block";
+                if (btn) btn.innerText = "⏸ Hide";
+            } else {
+                container.style.display = "none";
+                if (btn) btn.innerText = "▶ Preview";
+            }
+        }
+
+        // SSE Real-time Updates
+        function connectSSE() {
+            if (eventSource) eventSource.close();
+            eventSource = new EventSource("/api/queue/stream");
+
+            eventSource.onmessage = (e) => {
+                try {
+                    const data = JSON.parse(e.data);
+                    if (data.type === "init") {
+                        allJobs = data.jobs || [];
+                        renderQueueDashboard();
+                    } else if (data.type === "job_added" || data.type === "job_update") {
+                        fetchQueueJobs();
+                    } else if (data.type === "groq_failover") {
+                        showToast("Groq Key Auto-Switch", "Groq API key limit reached. Automatically switched to another available key.", "info", 4000, `groq_failover:${Date.now()}`);
+                    } else if (data.type === "groq_all_failed") {
+                        showToast("Groq API Error", "All configured Groq API keys are currently rate-limited or unavailable.", "error", 6000, `groq_all_failed:${Date.now()}`);
+                    }
+                } catch (err) {
+                    console.error("SSE parse error:", err);
+                }
+            };
+
+            eventSource.onerror = () => {
+                setTimeout(connectSSE, 3000);
+            };
+        }
+
+        async function fetchQueueJobs() {
+            try {
+                const res = await fetch("/api/queue");
+                if (res.ok) {
+                    allJobs = await res.json();
+                    renderQueueDashboard();
+                }
+            } catch (err) {
+                console.error("Error fetching queue jobs:", err);
+            }
+        }
+
+        function renderQueueDashboard() {
+            if (!Array.isArray(allJobs)) allJobs = [];
+
+            // State Change Notification Triggering
+            if (isInitialQueueLoad) {
+                allJobs.forEach(j => {
+                    trackedJobStatuses.set(j.job_id, j.status);
+                    shownToastEventIds.add(`queued:${j.job_id}`);
+                    shownToastEventIds.add(`processing:${j.job_id}`);
+                    shownToastEventIds.add(`completed:${j.job_id}`);
+                    shownToastEventIds.add(`failed:${j.job_id}`);
+                });
+                isInitialQueueLoad = false;
+            } else {
+                allJobs.forEach(j => {
+                    const prevStatus = trackedJobStatuses.get(j.job_id);
+                    const currStatus = j.status;
+
+                    if (prevStatus !== currStatus) {
+                        trackedJobStatuses.set(j.job_id, currStatus);
+
+                        if (currStatus === "QUEUED") {
+                            showToast("Video Queued", "Video added to queue.", "info", 3000, `queued:${j.job_id}`);
+                        } else if (["DOWNLOADING", "EXTRACTING_AUDIO", "TRANSCRIBING", "TRANSLATING", "GENERATING_VOICE", "GENERATING_SUBTITLES", "RENDERING"].includes(currStatus)) {
+                            showToast("Processing Started", "Video is now being processed.", "info", 3000, `processing:${j.job_id}`);
+                        } else if (currStatus === "COMPLETED") {
+                            showToast("Video Completed", "Your video is ready.", "success", 3000, `completed:${j.job_id}`);
+                        } else if (currStatus === "FAILED") {
+                            showToast("Processing Failed", j.error_message ? `Your video could not be processed: ${j.error_message}` : "Your video could not be processed.", "error", 6000, `failed:${j.job_id}`);
+                        }
+                    }
+                });
+            }
+
+            const activeJobs = allJobs.filter(j => ["DOWNLOADING", "EXTRACTING_AUDIO", "TRANSCRIBING", "TRANSLATING", "GENERATING_VOICE", "GENERATING_SUBTITLES", "RENDERING"].includes(j.status));
+            const queuedJobs = allJobs.filter(j => j.status === "QUEUED");
+            const completedJobs = allJobs.filter(j => j.status === "COMPLETED");
+            const failedJobs = allJobs.filter(j => j.status === "FAILED");
+
+            const setElText = (id, text) => {
+                const el = document.getElementById(id);
+                if (el) el.innerText = text;
+            };
+
+            setElText("statActive", activeJobs.length);
+            setElText("statQueued", queuedJobs.length);
+            setElText("statCompleted", completedJobs.length);
+            setElText("statFailed", failedJobs.length);
+
+            // Render Active Processing Banner
+            try {
+                const activeSection = document.getElementById("activeJobSection");
+                if (activeSection) {
+                    if (activeJobs.length > 0) {
+                        const job = activeJobs[0];
+                        activeJobId = job.job_id;
+                        activeSection.style.display = "block";
+                        setElText("activeJobTitle", job.title || `Job (${job.job_id})`);
+                        setElText("activeJobStageMsg", job.stage_message || "Processing...");
+                        setElText("activeJobPercent", `${job.progress}%`);
+                        const fill = document.getElementById("activeJobProgressFill");
+                        if (fill) fill.style.width = `${job.progress}%`;
+                    } else {
+                        activeJobId = null;
+                        activeSection.style.display = "none";
+                    }
+                }
+            } catch (err) {
+                console.error("Error rendering active section:", err);
+            }
+
+            // Render Waiting Queue
+            try {
+                const waitingBox = document.getElementById("waitingQueueList");
+                if (waitingBox) {
+                    if (queuedJobs.length > 0) {
+                        waitingBox.innerHTML = queuedJobs.map((j, idx) => `
+                            <div class="job-card">
+                                <div class="job-info">
+                                    <div class="job-title">#${idx + 1} - ${escapeHtml(j.title || j.url)}</div>
+                                    <div class="job-meta">ID: ${escapeHtml(j.job_id)} | Status: ${escapeHtml(j.stage_message || 'Queued')}</div>
+                                </div>
+                                <span class="badge-status badge-queued">Queued</span>
+                                <button class="btn-secondary" onclick="cancelJob('${j.job_id}')" style="color:#ef4444; border-color:rgba(239,68,68,0.3);">Cancel</button>
+                            </div>
+                        `).join("");
+                    } else {
+                        waitingBox.innerHTML = '<div style="text-align: center; padding: 1.5rem; color: var(--text-muted); font-size: 0.88rem;">No videos currently waiting in queue.</div>';
+                    }
+                }
+            } catch (err) {
+                console.error("Error rendering waiting queue:", err);
+            }
+
+            // Render Completed Videos
+            try {
+                const completedBox = document.getElementById("completedQueueList");
+                if (completedBox) {
+                    if (completedJobs.length > 0) {
+                        completedBox.innerHTML = completedJobs.map(j => {
+                            const title = escapeHtml(j.title || j.job_id);
+                            const streamUrl = `/api/jobs/${j.job_id}/stream`;
+                            const mp4Url = `/api/jobs/${j.job_id}/download/mp4`;
+                            const srtUrl = `/api/jobs/${j.job_id}/download/srt`;
+                            const timeStr = j.completed_at ? new Date(j.completed_at * 1000).toLocaleString() : '';
+
+                            return `
+                                <div class="job-card" style="flex-direction: column; align-items: stretch; gap: 10px;">
+                                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap;">
+                                        <div class="job-info" style="min-width: 220px;">
+                                            <div class="job-title" title="${title}">✓ ${title}</div>
+                                            <div class="job-meta">ID: ${escapeHtml(j.job_id)} ${timeStr ? '| Completed: ' + timeStr : ''}</div>
+                                        </div>
+                                        <span class="badge-status badge-completed">Completed</span>
+                                        <div style="display:flex; gap:6px; align-items:center;">
+                                            <button id="btn-preview-${j.job_id}" onclick="toggleVideoPreview('${j.job_id}')" class="btn-secondary" style="padding:6px 12px; font-size:0.8rem; background: rgba(124, 58, 237, 0.08); color: var(--accent-primary); border-color: var(--accent-light-border);">▶ Preview</button>
+                                            <a href="${mp4Url}" download class="btn-primary" style="padding:6px 12px; font-size:0.8rem; text-decoration:none;">⬇ MP4</a>
+                                            <a href="${srtUrl}" download class="btn-secondary" style="padding:6px 12px; font-size:0.8rem; text-decoration:none;">📄 SRT</a>
+                                            <button onclick="deleteJob('${j.job_id}')" class="btn-secondary" style="padding:6px 10px; font-size:0.8rem; color:#ef4444; border-color:rgba(239,68,68,0.3);" title="Remove job from list">🗑️</button>
+                                        </div>
+                                    </div>
+                                    <div id="video-player-${j.job_id}" style="display: none; padding-top: 10px; border-top: 1px dashed rgba(226, 232, 240, 0.8);">
+                                        <div style="display: flex; justify-content: center; background: rgba(15, 23, 42, 0.04); padding: 12px; border-radius: 14px;">
+                                            <video controls preload="metadata" style="max-width: 100%; width: 280px; max-height: 480px; aspect-ratio: 9/16; border-radius: 12px; object-fit: contain; background: #000; box-shadow: 0 8px 25px rgba(0,0,0,0.15);" src="${streamUrl}">
+                                                Your browser does not support HTML5 video streaming.
+                                            </video>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        }).join("");
+                    } else {
+                        completedBox.innerHTML = '<div style="text-align: center; padding: 1.5rem; color: var(--text-muted); font-size: 0.88rem;">No completed video outputs yet.</div>';
+                    }
+                }
+            } catch (err) {
+                console.error("Error rendering completed jobs:", err);
+            }
+
+            // Render Failed Jobs
+            try {
+                const failedBox = document.getElementById("failedQueueList");
+                if (failedBox) {
+                    if (failedJobs.length > 0) {
+                        failedBox.innerHTML = failedJobs.map(j => {
+                            const title = escapeHtml(j.title || j.job_id);
+                            const errorMsg = escapeHtml(j.error_message || "Processing failed");
+                            const timeStr = j.failed_at ? new Date(j.failed_at * 1000).toLocaleString() : (j.created_at ? new Date(j.created_at * 1000).toLocaleString() : '');
+
+                            return `
+                                <div class="job-card" style="flex-direction: column; align-items: stretch; gap: 8px;">
+                                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap;">
+                                        <div class="job-info" style="min-width: 220px;">
+                                            <div class="job-title" style="color:#ef4444;" title="${title}">✕ ${title}</div>
+                                            <div class="job-meta" style="color:#64748b;">ID: ${escapeHtml(j.job_id)} ${timeStr ? '| Failed: ' + timeStr : ''}</div>
+                                        </div>
+                                        <span class="badge-status badge-failed">Failed</span>
+                                        <div style="display:flex; gap:6px; align-items:center;">
+                                            <button onclick="retryJob('${j.job_id}')" class="btn-secondary" style="padding:6px 12px; font-size:0.8rem; background:rgba(99,102,241,0.1); color:#6366f1; border-color:rgba(99,102,241,0.3);">🔄 Retry</button>
+                                            <button onclick="deleteJob('${j.job_id}')" class="btn-secondary" style="padding:6px 10px; font-size:0.8rem; color:#ef4444; border-color:rgba(239,68,68,0.3);" title="Remove job from list">🗑️</button>
+                                        </div>
+                                    </div>
+                                    <div style="font-size: 0.82rem; color: #dc2626; background: rgba(239, 68, 68, 0.08); padding: 8px 12px; border-radius: 8px; font-family: monospace; word-break: break-all;">
+                                        ⚠️ ${errorMsg}
+                                    </div>
+                                </div>
+                            `;
+                        }).join("");
+                    } else {
+                        failedBox.innerHTML = '<div style="text-align: center; padding: 1.5rem; color: var(--text-muted); font-size: 0.88rem;">No failed video jobs.</div>';
+                    }
+                }
+            } catch (err) {
+                console.error("Error rendering failed jobs:", err);
+            }
+        }
+
+        async function addVideoToQueue() {
+            const input = document.getElementById("videoUrlInput");
+            const url = input.value.trim();
+            if (!url) {
+                showToast("Invalid URL", "Please enter a valid Video URL first.", "warning");
+                return;
+            }
+
+            try {
+                const res = await fetch("/api/queue/add", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ url: url })
+                });
+                const data = await res.json();
+                if (res.ok && data.status === "success") {
+                    showToast("Video Queued", "Video added to processing queue.", "info");
+                    input.value = "";
+                    fetchQueueJobs();
+                } else {
+                    showToast("Queue Error", data.detail || "Could not add video to queue.", "error");
+                }
+            } catch (err) {
+                showToast("Connection Error", "Failed to connect to server: " + err.message, "error");
+            }
+        }
+
+        async function cancelActiveJob() {
+            if (activeJobId) cancelJob(activeJobId);
+        }
+
+        async function cancelJob(jobId) {
+            try {
+                await fetch(`/api/queue/cancel/${jobId}`, { method: "POST" });
+                showToast("Job Cancelled", "Job was cancelled.", "info");
+                fetchQueueJobs();
+            } catch (err) {
+                showToast("Cancel Error", "Error cancelling job: " + err.message, "error");
+            }
+        }
+
+        async function retryJob(jobId) {
+            try {
+                await fetch(`/api/queue/retry/${jobId}`, { method: "POST" });
+                showToast("Job Retried", "Retrying job...", "info");
+                fetchQueueJobs();
+            } catch (err) {
+                showToast("Retry Error", "Error retrying job: " + err.message, "error");
+            }
+        }
+
+        async function deleteJob(jobId) {
+            const confirmed = await showConfirmDialog({
+                title: "Remove Video?",
+                message: "Remove this job record from queue history?",
+                confirmText: "Remove",
+                cancelText: "Cancel",
+                type: "danger"
+            });
+            if (!confirmed) return;
+
+            try {
+                const res = await fetch(`/api/queue/job/${jobId}`, { method: "DELETE" });
+                if (res.ok) {
+                    showToast("Job Removed", "Job removed successfully.", "success");
+                    fetchQueueJobs();
+                } else {
+                    const data = await res.json().catch(() => ({}));
+                    showToast("Remove Failed", data.detail || "Failed to remove job.", "error");
+                }
+            } catch (err) {
+                showToast("Remove Error", "Error removing job: " + err.message, "error");
+            }
+        }
+
+        async function clearCompletedJobs() {
+            const confirmed = await showConfirmDialog({
+                title: "Clear Completed History?",
+                message: "Clear all completed jobs from history list?",
+                confirmText: "Clear List",
+                cancelText: "Cancel",
+                type: "danger"
+            });
+            if (!confirmed) return;
+
+            try {
+                await fetch("/api/queue/completed", { method: "DELETE" });
+                showToast("History Cleared", "Completed list cleared.", "success");
+                fetchQueueJobs();
+            } catch (err) {
+                showToast("Clear Error", "Error clearing completed jobs: " + err.message, "error");
+            }
+        }
+
+        function showBanner(text, type) {
+            const b = document.getElementById("urlMessageBanner");
+            b.style.display = "block";
+            b.innerText = text;
+            b.style.background = type === "danger" ? "rgba(239, 68, 68, 0.15)" : "rgba(16, 185, 129, 0.15)";
+            b.style.color = type === "danger" ? "#f87171" : "#34d399";
+            setTimeout(() => b.style.display = "none", 4000);
+        }
+
+        // Settings Modal Handlers
+        function openSettingsModal() {
+            loadSavedSettings();
+            document.getElementById("settingsModal").style.display = "flex";
+        }
+
+        function closeSettingsModal() {
+            document.getElementById("settingsModal").style.display = "none";
+        }
+
+        function switchSettingsTab(tabId) {
+            document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+            document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
+
+            event.target.classList.add("active");
+            document.getElementById(tabId).classList.add("active");
+        }
+
+        let cachedCustomVoices = [];
+
+        function toggleVoiceEngineUI() {
+            const engine = document.getElementById("setVoiceEngine").value;
+            const edgeBox = document.getElementById("edgeTtsControls");
+            const cloneBox = document.getElementById("voiceCloneControls");
+            if (engine === "edge_tts" || engine === "edge") {
+                if (edgeBox) edgeBox.style.display = "block";
+                if (cloneBox) cloneBox.style.display = "none";
+            } else {
+                if (edgeBox) edgeBox.style.display = "none";
+                if (cloneBox) cloneBox.style.display = "block";
+            }
+        }
+
+        function onVoiceCloneNameChange() {
+            const cloneSelect = document.getElementById("setVoiceCloneName");
+            const refSelect = document.getElementById("setVoxcpmSavedReference");
+            if (!cloneSelect || !refSelect) return;
+            const val = cloneSelect.value;
+            if (val === "voxcpm2-clone") {
+                refSelect.value = "";
+            } else {
+                refSelect.value = val;
+            }
+            onVoxcpmReferenceChange();
+        }
+
+        function onVoxcpmReferenceChange() {
+            const refSelect = document.getElementById("setVoxcpmSavedReference");
+            const cloneSelect = document.getElementById("setVoiceCloneName");
+            const refTextGroup = document.getElementById("voxcpmReferenceTextGroup");
+            const refTextEl = document.getElementById("setVoxcpmReferenceText");
+            if (!refSelect) return;
+
+            const selectedId = refSelect.value;
+            if (cloneSelect && cloneSelect.value !== (selectedId || "voxcpm2-clone")) {
+                cloneSelect.value = selectedId || "voxcpm2-clone";
+            }
+
+            if (!selectedId) {
+                if (refTextGroup) refTextGroup.style.display = "none";
+                if (refTextEl) refTextEl.value = "";
+                return;
+            }
+
+            if (refTextGroup) refTextGroup.style.display = "block";
+            const match = (cachedCustomVoices || []).find(v => v.id === selectedId);
+            if (match && refTextEl) {
+                refTextEl.value = match.text || match.reference_text || "";
+            }
+        }
+
+        function toggleAddRefPanel() {
+            const panel = document.getElementById("addRefPanel");
+            if (panel) {
+                panel.style.display = panel.style.display === "none" ? "block" : "none";
+            }
+        }
+
+        async function saveNewVoiceReference() {
+            const nameEl = document.getElementById("newRefName");
+            const fileEl = document.getElementById("newRefFile");
+            const textEl = document.getElementById("newRefText");
+
+            if (!fileEl || !fileEl.files || fileEl.files.length === 0) {
+                showToast("Invalid File", "Please select an audio file (.wav or .mp3) for reference.", "warning");
+                return;
+            }
+
+            const refName = nameEl ? nameEl.value.trim() : "Custom Reference";
+            const refText = textEl ? textEl.value.trim() : "";
+
+            const formData = new FormData();
+            formData.append("file", fileEl.files[0]);
+            formData.append("name", refName);
+            formData.append("voice_name", refName);
+            formData.append("reference_text", refText);
+
+            try {
+                const res = await fetch("/api/voices/custom", {
+                    method: "POST",
+                    body: formData
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    showToast("Reference Saved", "Voice reference saved successfully!", "success");
+                    await loadCustomVoicesAndFonts();
+                    if (data.id) {
+                        const refSelect = document.getElementById("setVoxcpmSavedReference");
+                        if (refSelect) {
+                            refSelect.value = data.id;
+                            onVoxcpmReferenceChange();
+                        }
+                    }
+                    toggleAddRefPanel();
+                    if (nameEl) nameEl.value = "";
+                    if (fileEl) fileEl.value = "";
+                    if (textEl) textEl.value = "";
+                } else {
+                    const errData = await res.json().catch(() => ({}));
+                    showToast("Save Failed", "Failed to save reference: " + (errData.detail || "Server error"), "error");
+                }
+            } catch (err) {
+                showToast("Save Error", "Error saving voice reference: " + err.message, "error");
+            }
+        }
+
+        async function loadSavedSettings() {
+            try {
+                const res = await fetch("/api/settings");
+                const s = await res.json();
+                
+                document.getElementById("setAiProvider").value = s.ai_provider || "gemini";
+                loadGroqKeysList();
+                document.getElementById("setGeminiApiKey").value = s.gemini_api_key || "";
+                document.getElementById("setOpenAiApiKey").value = s.openai_api_key || "";
+                document.getElementById("setAiSystemPrompt").value = s.ai_system_prompt || "";
+                document.getElementById("setTranslationPrompt").value = s.translation_prompt || "";
+
+                document.getElementById("setTargetLanguage").value = s.target_language || "Burmese";
+                document.getElementById("setTranslationStyle").value = s.translation_style || "documentary";
+                document.getElementById("setScriptRewritingEnabled").checked = s.script_rewriting_enabled !== false;
+
+                const vEngine = s.voice_engine || (s.voice_provider === "edge" ? "edge_tts" : "voice_clone");
+                document.getElementById("setVoiceEngine").value = vEngine;
+                toggleVoiceEngineUI();
+
+                document.getElementById("setEdgeTtsVoice").value = s.edge_tts_voice || "my-MM-NilarNeural";
+                document.getElementById("setEdgeTtsPitch").value = s.edge_tts_pitch || "+1.2";
+                document.getElementById("setEdgeTtsSpeed").value = s.edge_tts_speed || 1.0;
+                document.getElementById("setVoiceCloneName").value = s.voice_clone_name || "voxcpm2-clone";
+
+                if (s.voxcpm_reference_id) {
+                    const refSelect = document.getElementById("setVoxcpmSavedReference");
+                    if (refSelect) refSelect.value = s.voxcpm_reference_id;
+                }
+                if (s.voxcpm_reference_text) {
+                    const refText = document.getElementById("setVoxcpmReferenceText");
+                    if (refText) refText.value = s.voxcpm_reference_text;
+                }
+
+                document.getElementById("setAudioQuality").value = s.audio_quality || "high";
+                document.getElementById("setAudioNormalization").checked = s.audio_normalization !== false;
+                document.getElementById("setSmoothSegmentJoin").checked = s.smooth_segment_join !== false;
+                document.getElementById("setSilenceCleanup").checked = s.silence_cleanup !== false;
+                document.getElementById("setAutoAudioValidation").checked = s.auto_audio_validation !== false;
+
+                document.getElementById("setSamplePreviewText").value = s.sample_preview_text || "သစ်သားကို မြေတွင်းထဲထည့် မီးရှို့လိုက်တဲ့အခါ ဘာဖြစ်လာသလဲ။";
+                document.getElementById("setSubFontSelect").value = s.sub_font_name || "Pyidaungsu";
+                document.getElementById("setSubFontSize").value = s.sub_font_size || 28;
+                
+                const loadedFontColor = (s.sub_font_color || "#FFD700").toUpperCase();
+                document.getElementById("setSubFontColor").value = loadedFontColor;
+                document.getElementById("setSubFontColorPicker").value = loadedFontColor;
+                document.getElementById("setSubFontColorHex").value = loadedFontColor;
+                updateFontColorSelectionUI();
+
+                document.getElementById("setSubAlignment").value = s.sub_alignment || "center";
+                document.getElementById("setSubOutline").checked = s.sub_outline !== false;
+                document.getElementById("setSubOutlineColor").value = s.sub_outline_color || "#000000";
+                document.getElementById("setSubOutlineWidth").value = s.sub_outline_width || 3;
+                document.getElementById("setSubShadow").checked = s.sub_shadow !== false;
+                document.getElementById("setSubShadowStrength").value = s.sub_shadow_strength || 2;
+                document.getElementById("setSubPosition").value = s.sub_position || "bottom";
+                document.getElementById("setSubMarginV").value = s.sub_margin_v || 120;
+                document.getElementById("setSubX").value = s.sub_x !== null && s.sub_x !== undefined ? s.sub_x : "";
+                document.getElementById("setSubY").value = s.sub_y !== null && s.sub_y !== undefined ? s.sub_y : "";
+                document.getElementById("setMaxCharsPerLine").value = s.max_chars_per_line || 30;
+                document.getElementById("setShowSafeArea").checked = s.show_safe_area !== false;
+                document.getElementById("setBurnSubtitles").checked = s.burn_subtitles !== false;
+
+                document.getElementById("setResolution").value = s.resolution || "1080x1920";
+                document.getElementById("setGpuAcceleration").checked = s.gpu_acceleration !== false;
+
+                document.getElementById("setAutoStartNext").checked = s.auto_start_next !== false;
+                document.getElementById("setAutoRetryFailed").checked = s.auto_retry_failed !== false;
+                document.getElementById("setMaxRetries").value = s.max_retries || 3;
+                document.getElementById("setAutoCleanTemp").checked = s.auto_clean_temp !== false;
+
+                // Refresh 9:16 Live Preview
+                updateSubtitleLivePreview();
+            } catch (err) {
+                console.error("Failed to load settings:", err);
+            }
+        }
+
+        // Color Preset Swatch Handlers
+        function selectFontColorPreset(hexColor) {
+            const cleanHex = hexColor.toUpperCase();
+            document.getElementById("setSubFontColor").value = cleanHex;
+            document.getElementById("setSubFontColorPicker").value = cleanHex;
+            document.getElementById("setSubFontColorHex").value = cleanHex;
+            document.getElementById("customColorRow").style.display = "none";
+            updateFontColorSelectionUI(false);
+            updateSubtitleLivePreview();
+        }
+
+        function openCustomColorPicker() {
+            document.getElementById("customColorRow").style.display = "flex";
+            const currentColor = (document.getElementById("setSubFontColor").value || "#FFD700").toUpperCase();
+            selectCustomColor(currentColor);
+            document.getElementById("setSubFontColorPicker").click();
+        }
+
+        function onCustomColorInputChange(hexColor) {
+            selectCustomColor(hexColor.toUpperCase());
+        }
+
+        function onCustomColorHexInput(hexText) {
+            const val = hexText.trim().toUpperCase();
+            if (/^#[0-9A-F]{6}$/.test(val)) {
+                selectCustomColor(val);
+            }
+        }
+
+        function selectCustomColor(hexColor) {
+            const cleanHex = hexColor.toUpperCase();
+            document.getElementById("setSubFontColor").value = cleanHex;
+            document.getElementById("setSubFontColorPicker").value = cleanHex;
+            document.getElementById("setSubFontColorHex").value = cleanHex;
+            const dot = document.getElementById("customColorDot");
+            if (dot) dot.style.background = cleanHex;
+            updateFontColorSelectionUI(true);
+            updateSubtitleLivePreview();
+        }
+
+        function updateFontColorSelectionUI(isCustom = false) {
+            const currentColor = (document.getElementById("setSubFontColor").value || "#FFD700").toUpperCase();
+            const buttons = document.querySelectorAll(".color-swatch-btn[data-color]");
+            let matchedPreset = false;
+
+            buttons.forEach(btn => {
+                const btnColor = btn.getAttribute("data-color").toUpperCase();
+                const check = btn.querySelector(".swatch-check");
+                if (!isCustom && btnColor === currentColor) {
+                    btn.classList.add("active");
+                    if (check) check.style.display = "inline";
+                    matchedPreset = true;
+                } else {
+                    btn.classList.remove("active");
+                    if (check) check.style.display = "none";
+                }
+            });
+
+            const customBtn = document.getElementById("customColorBtn");
+            const customCheck = document.getElementById("customColorCheck");
+            if (isCustom || !matchedPreset) {
+                if (customBtn) customBtn.classList.add("active");
+                if (customCheck) customCheck.style.display = "inline";
+                document.getElementById("customColorRow").style.display = "flex";
+                const dot = document.getElementById("customColorDot");
+                if (dot) dot.style.background = currentColor;
+            } else {
+                if (customBtn) customBtn.classList.remove("active");
+                if (customCheck) customCheck.style.display = "none";
+            }
+        }
+
+        async function saveSettingsFromModal() {
+            const vEngine = document.getElementById("setVoiceEngine").value;
+            const isEdge = vEngine === "edge_tts" || vEngine === "edge";
+
+            const selectedRefId = document.getElementById("setVoiceCloneName") ? document.getElementById("setVoiceCloneName").value : "";
+            const refMatch = (cachedCustomVoices || []).find(v => v.id === selectedRefId || v.name === selectedRefId);
+            const refAudio = refMatch ? (refMatch.audio_path || refMatch.voice_file_path || "") : "";
+            const refText = refMatch ? (refMatch.text || refMatch.reference_text || "") : "";
+
+            const payload = {
+                ai_provider: document.getElementById("setAiProvider").value,
+                groq_api_key: document.getElementById("setGroqApiKey").value.trim(),
+                gemini_api_key: document.getElementById("setGeminiApiKey").value.trim(),
+                openai_api_key: document.getElementById("setOpenAiApiKey").value.trim(),
+                ai_system_prompt: document.getElementById("setAiSystemPrompt").value,
+                translation_prompt: document.getElementById("setTranslationPrompt").value,
+
+                target_language: document.getElementById("setTargetLanguage").value,
+                translation_style: document.getElementById("setTranslationStyle").value,
+                script_rewriting_enabled: document.getElementById("setScriptRewritingEnabled").checked,
+
+                voice_engine: isEdge ? "edge_tts" : "voice_clone",
+                voice_provider: isEdge ? "edge" : "voxcpm",
+                voice: isEdge ? ("edge-" + document.getElementById("setEdgeTtsVoice").value) : "voxcpm2-clone",
+                edge_tts_voice: document.getElementById("setEdgeTtsVoice").value,
+                edge_tts_pitch: document.getElementById("setEdgeTtsPitch").value.trim() || "+1.2",
+                edge_tts_speed: parseFloat(document.getElementById("setEdgeTtsSpeed").value) || 1.0,
+                voice_clone_name: selectedRefId,
+                voice_clone_pitch: "0",
+                voxcpm_reference_id: selectedRefId,
+                voxcpm_reference_audio: refAudio,
+                voxcpm_reference_text: refText,
+                prompt_text: refText,
+
+                audio_quality: document.getElementById("setAudioQuality").value,
+                audio_normalization: document.getElementById("setAudioNormalization").checked,
+                smooth_segment_join: document.getElementById("setSmoothSegmentJoin").checked,
+                silence_cleanup: document.getElementById("setSilenceCleanup").checked,
+                auto_audio_validation: document.getElementById("setAutoAudioValidation").checked,
+
+                sample_preview_text: document.getElementById("setSamplePreviewText").value.trim(),
+                sub_font_name: document.getElementById("setSubFontSelect").value,
+                sub_font_size: parseInt(document.getElementById("setSubFontSize").value) || 28,
+                sub_font_color: document.getElementById("setSubFontColor").value,
+                sub_alignment: document.getElementById("setSubAlignment").value,
+                sub_outline: document.getElementById("setSubOutline").checked,
+                sub_outline_color: document.getElementById("setSubOutlineColor").value,
+                sub_outline_width: parseInt(document.getElementById("setSubOutlineWidth").value) || 3,
+                sub_shadow: document.getElementById("setSubShadow").checked,
+                sub_shadow_strength: parseInt(document.getElementById("setSubShadowStrength").value) || 2,
+                sub_position: document.getElementById("setSubPosition").value,
+                sub_margin_v: parseInt(document.getElementById("setSubMarginV").value) || 120,
+                sub_x: document.getElementById("setSubX").value !== "" ? parseInt(document.getElementById("setSubX").value) : null,
+                sub_y: document.getElementById("setSubY").value !== "" ? parseInt(document.getElementById("setSubY").value) : null,
+                max_chars_per_line: parseInt(document.getElementById("setMaxCharsPerLine").value) || 30,
+                show_safe_area: document.getElementById("setShowSafeArea").checked,
+                burn_subtitles: document.getElementById("setBurnSubtitles").checked,
+
+                resolution: document.getElementById("setResolution").value,
+                gpu_acceleration: document.getElementById("setGpuAcceleration").checked,
+
+                auto_start_next: document.getElementById("setAutoStartNext").checked,
+                auto_retry_failed: document.getElementById("setAutoRetryFailed").checked,
+                max_retries: parseInt(document.getElementById("setMaxRetries").value),
+                auto_clean_temp: document.getElementById("setAutoCleanTemp").checked
+            };
+
+            try {
+                const res = await fetch("/api/settings", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+                if (res.ok) {
+                    showToast("Settings Saved", "Your settings were saved successfully.", "success");
+                    closeSettingsModal();
+                } else {
+                    const errData = await res.json().catch(() => ({}));
+                    showToast("Save Failed", errData.detail || "Failed to save settings.", "error");
+                }
+            } catch (err) {
+                showToast("Save Error", "Error saving settings: " + err.message, "error");
+            }
+        }
+
+        // Live Subtitle Preview & Drag-and-Drop Handlers
+        function wrapSubtitleTextJS(text, maxCharsPerLine) {
+            if (!text) return "";
+            const cleanText = text.trim();
+            if (cleanText.length <= maxCharsPerLine) return cleanText;
+
+            const mid = Math.floor(cleanText.length / 2);
+
+            const puncs = [];
+            for (let i = 0; i < cleanText.length; i++) {
+                if (cleanText[i] === "၊" || cleanText[i] === "။") puncs.push(i + 1);
+            }
+            if (puncs.length > 0) {
+                puncs.sort((a, b) => Math.abs(a - mid) - Math.abs(b - mid));
+                const pos = puncs[0];
+                const line1 = cleanText.slice(0, pos).trim();
+                const line2 = cleanText.slice(pos).trim();
+                if (line1 && line2) return line1 + "\n" + line2;
+            }
+
+            const spaces = [];
+            for (let i = 0; i < cleanText.length; i++) {
+                if (cleanText[i] === " ") spaces.push(i);
+            }
+            if (spaces.length > 0) {
+                spaces.sort((a, b) => Math.abs(a - mid) - Math.abs(b - mid));
+                const pos = spaces[0];
+                const line1 = cleanText.slice(0, pos).trim();
+                const line2 = cleanText.slice(pos).trim();
+                if (line1 && line2) return line1 + "\n" + line2;
+            }
+
+            const line1 = cleanText.slice(0, mid).trim();
+            const line2 = cleanText.slice(mid).trim();
+            return line1 + "\n" + line2;
+        }
+
+        function updateSubtitleLivePreview() {
+            const rawText = document.getElementById("setSamplePreviewText").value || "သစ်သားကို မြေတွင်းထဲထည့် မီးရှို့လိုက်တဲ့အခါ ဘာဖြစ်လာသလဲ။";
+            const maxChars = parseInt(document.getElementById("setMaxCharsPerLine").value) || 30;
+            const fontName = document.getElementById("setSubFontSelect").value || "Pyidaungsu";
+            const fontSize1080 = parseInt(document.getElementById("setSubFontSize").value) || 28;
+            const fontColor = document.getElementById("setSubFontColor").value || "#FFFFFF";
+            const alignment = document.getElementById("setSubAlignment").value || "center";
+            const outlineOn = document.getElementById("setSubOutline").checked;
+            const outlineColor = document.getElementById("setSubOutlineColor").value || "#000000";
+            const outlineWidth1080 = parseInt(document.getElementById("setSubOutlineWidth").value) || 3;
+            const shadowOn = document.getElementById("setSubShadow").checked;
+            const shadowStr1080 = parseInt(document.getElementById("setSubShadowStrength").value) || 2;
+            const posMode = document.getElementById("setSubPosition").value || "bottom";
+            const marginV1080 = parseInt(document.getElementById("setSubMarginV").value) || 120;
+            const showSafeArea = document.getElementById("setShowSafeArea").checked;
+
+            const guide = document.getElementById("safeAreaGuide");
+            if (guide) guide.style.display = showSafeArea ? "block" : "none";
+
+            const wrappedText = wrapSubtitleTextJS(rawText, maxChars);
+            const textSpan = document.getElementById("previewSubtitleText");
+            if (textSpan) {
+                textSpan.innerText = wrappedText;
+                textSpan.style.whiteSpace = "pre-line";
+            }
+
+            const scale = 0.25; // 270 / 1080
+            const fontPx = Math.max(8, fontSize1080 * scale);
+            const outlinePx = Math.max(0.5, outlineWidth1080 * scale);
+            const shadowPx = Math.max(0.5, shadowStr1080 * scale);
+
+            const box = document.getElementById("previewSubtitleBox");
+            if (!box) return;
+
+            box.style.fontFamily = fontName + ", Pyidaungsu, sans-serif";
+            box.style.fontSize = fontPx + "px";
+            box.style.color = fontColor;
+            box.style.textAlign = alignment;
+
+            let shadowCss = [];
+            if (outlineOn) {
+                shadowCss.push(`-${outlinePx}px -${outlinePx}px 0 ${outlineColor}`);
+                shadowCss.push(`${outlinePx}px -${outlinePx}px 0 ${outlineColor}`);
+                shadowCss.push(`-${outlinePx}px ${outlinePx}px 0 ${outlineColor}`);
+                shadowCss.push(`${outlinePx}px ${outlinePx}px 0 ${outlineColor}`);
+            }
+            if (shadowOn) {
+                shadowCss.push(`${shadowPx}px ${shadowPx}px ${shadowPx * 1.5}px rgba(0,0,0,0.8)`);
+            }
+            box.style.textShadow = shadowCss.length > 0 ? shadowCss.join(", ") : "none";
+
+            const customX = document.getElementById("setSubX").value;
+            const customY = document.getElementById("setSubY").value;
+
+            if (posMode === "custom" && customY !== "" && customY !== null) {
+                const py = parseFloat(customY) * scale;
+                box.style.top = py + "px";
+                box.style.bottom = "auto";
+                if (customX !== "" && customX !== null) {
+                    const px = parseFloat(customX) * scale;
+                    box.style.left = px + "px";
+                    box.style.transform = "none";
+                } else {
+                    box.style.left = "50%";
+                    box.style.transform = "translateX(-50%)";
+                }
+            } else if (posMode === "top") {
+                const topPx = marginV1080 * scale;
+                box.style.top = topPx + "px";
+                box.style.bottom = "auto";
+                box.style.left = "50%";
+                box.style.transform = "translateX(-50%)";
+            } else if (posMode === "center") {
+                box.style.top = "50%";
+                box.style.bottom = "auto";
+                box.style.left = "50%";
+                box.style.transform = "translate(-50%, -50%)";
+            } else { // bottom
+                const btmPx = marginV1080 * scale;
+                box.style.top = "auto";
+                box.style.bottom = btmPx + "px";
+                box.style.left = "50%";
+                box.style.transform = "translateX(-50%)";
+            }
+        }
+
+        let isDraggingSub = false;
+
+        function startSubtitleDrag(e) {
+            isDraggingSub = true;
+            const box = document.getElementById("previewSubtitleBox");
+            if (!box) return;
+            box.style.cursor = "grabbing";
+            box.style.borderColor = "var(--accent-primary)";
+
+            const onMove = (evt) => {
+                if (!isDraggingSub) return;
+                const container = document.getElementById("previewCanvasContainer");
+                if (!container) return;
+                const rect = container.getBoundingClientRect();
+                const clientX = evt.touches ? evt.touches[0].clientX : evt.clientX;
+                const clientY = evt.touches ? evt.touches[0].clientY : evt.clientY;
+
+                let relX = clientX - rect.left;
+                let relY = clientY - rect.top;
+
+                relX = Math.max(0, Math.min(270, relX));
+                relY = Math.max(0, Math.min(480, relY));
+
+                const canvasX = Math.round(relX * 4);
+                const canvasY = Math.round(relY * 4);
+
+                document.getElementById("setSubPosition").value = "custom";
+                document.getElementById("setSubX").value = canvasX;
+                document.getElementById("setSubY").value = canvasY;
+
+                const marginV = Math.max(0, 1920 - canvasY);
+                document.getElementById("setSubMarginV").value = marginV;
+
+                updateSubtitleLivePreview();
+            };
+
+            const onEnd = () => {
+                isDraggingSub = false;
+                if (box) {
+                    box.style.cursor = "grab";
+                    box.style.borderColor = "transparent";
+                }
+                window.removeEventListener("mousemove", onMove);
+                window.removeEventListener("mouseup", onEnd);
+                window.removeEventListener("touchmove", onMove);
+                window.removeEventListener("touchend", onEnd);
+            };
+
+            window.addEventListener("mousemove", onMove);
+            window.addEventListener("mouseup", onEnd);
+            window.addEventListener("touchmove", onMove);
+            window.addEventListener("touchend", onEnd);
+        }
+
+        function resetSubtitlePosition() {
+            document.getElementById("setSubPosition").value = "bottom";
+            document.getElementById("setSubMarginV").value = 120;
+            document.getElementById("setSubAlignment").value = "center";
+            document.getElementById("setSubX").value = "";
+            document.getElementById("setSubY").value = "";
+            updateSubtitleLivePreview();
+        }
+
+        function onPositionModeChange() {
+            const pos = document.getElementById("setSubPosition").value;
+            if (pos !== "custom") {
+                document.getElementById("setSubX").value = "";
+                document.getElementById("setSubY").value = "";
+            }
+            updateSubtitleLivePreview();
+        }
+
+        function triggerFontUpload() {
+            const input = document.getElementById("fontFileInput");
+            if (input) input.click();
+        }
+
+        async function uploadCustomFont(input) {
+            if (!input.files || input.files.length === 0) return;
+            const file = input.files[0];
+            const formData = new FormData();
+            formData.append("file", file);
+
+            try {
+                const res = await fetch("/api/fonts", {
+                    method: "POST",
+                    body: formData
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    alert(`Font '${data.font_name}' uploaded successfully!`);
+                    await loadCustomVoicesAndFonts();
+                    const fontSelect = document.getElementById("setSubFontSelect");
+                    if (fontSelect && data.font_name) {
+                        fontSelect.value = data.font_name;
+                    }
+                    updateSubtitleLivePreview();
+                } else {
+                    const err = await res.json();
+                    alert(`Font upload failed: ${err.detail || 'Unknown error'}`);
+                }
+            } catch (e) {
+                console.error("Font upload error:", e);
+                alert(`Font upload failed: ${e.message}`);
+            } finally {
+                input.value = "";
+            }
+        }
+
+        async function loadCustomVoicesAndFonts() {
+            try {
+                // Load fonts
+                const fontRes = await fetch("/api/fonts");
+                const fonts = await fontRes.json();
+                const fontSelect = document.getElementById("setSubFontSelect");
+                if (fontSelect) {
+                    const curVal = fontSelect.value;
+                    const defaultOptions = [
+                        '<option value="Noto Sans Myanmar">Noto Sans Myanmar (Default)</option>',
+                        '<option value="Pyidaungsu">Pyidaungsu</option>',
+                        '<option value="Z10-Cartoon">Z10-Cartoon</option>'
+                    ];
+                    let customOpts = (fonts || []).map(f => `<option value="${f.font_name}">${f.font_name} (${f.file_name})</option>`);
+                    fontSelect.innerHTML = defaultOptions.concat(customOpts).join("");
+                    if (curVal && Array.from(fontSelect.options).some(o => o.value === curVal)) {
+                        fontSelect.value = curVal;
+                    } else {
+                        fontSelect.value = "Noto Sans Myanmar";
+                    }
+                }
+
+                // Load Edge TTS Voices
+                try {
+                    const edgeRes = await fetch("/api/voices/edge");
+                    if (edgeRes.ok) {
+                        const edgeVoices = await edgeRes.json();
+                        const edgeSelect = document.getElementById("setEdgeTtsVoice");
+                        if (edgeSelect && edgeVoices && edgeVoices.length > 0) {
+                            const curVal = edgeSelect.value;
+                            edgeSelect.innerHTML = edgeVoices.map(v => {
+                                const label = `${v.name} (${v.locale} - ${v.gender})`;
+                                return `<option value="${v.id}">${label}</option>`;
+                            }).join("");
+                            if (curVal) edgeSelect.value = curVal;
+                        }
+                    }
+                } catch (e) {
+                    console.warn("Could not load Edge voices list:", e);
+                }
+
+                // Load Custom VoxCPM Voices
+                const voiceRes = await fetch("/api/voices/custom");
+                if (voiceRes.ok) {
+                    const voices = await voiceRes.json();
+                    cachedCustomVoices = voices || [];
+                    const cloneSelect = document.getElementById("setVoiceCloneName");
+                    if (cloneSelect) {
+                        const curVal = cloneSelect.value;
+                        let options = '';
+                        if (cachedCustomVoices.length > 0) {
+                            options = cachedCustomVoices.map(v => `<option value="${v.id}">🎙️ ${v.name || v.voice_name || 'Custom Voice'} (${v.file_name || 'audio'})</option>`).join("");
+                        } else {
+                            options = '<option value="">-- No Custom Voices Available (+ Add New Voice Reference Below) --</option>';
+                        }
+                        cloneSelect.innerHTML = options;
+                        if (curVal && Array.from(cloneSelect.options).some(o => o.value === curVal)) {
+                            cloneSelect.value = curVal;
+                        }
+                    }
+                }
+            } catch (err) {
+                console.error("Error loading fonts/voices:", err);
+            }
+        }
+
+        let cachedGroqKeys = [];
+
+        async function loadGroqKeysList() {
+            try {
+                const res = await fetch("/api/settings/groq-keys");
+                if (res.ok) {
+                    cachedGroqKeys = await res.json();
+                    renderGroqKeysList(cachedGroqKeys);
+                }
+            } catch (err) {
+                console.error("Error loading Groq keys list:", err);
+            }
+        }
+
+        function renderGroqKeysList(keysList) {
+            const container = document.getElementById("groqKeysListContainer");
+            if (!container) return;
+
+            if (!keysList || keysList.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 16px; color: #6b7280; font-size: 0.88rem; background: rgba(255,255,255,0.5); border-radius: 10px; border: 1px dashed rgba(124, 58, 237, 0.2);">
+                        No Groq API keys configured. Click <b>+ Add Groq API Key</b> to set up your key.
+                    </div>`;
+                return;
+            }
+
+            let html = "";
+            keysList.forEach(k => {
+                let badgeBg = "#6b7280";
+                let badgeText = k.status;
+                let isStickyActive = k.status === "ACTIVE";
+
+                if (k.status === "ACTIVE") {
+                    badgeBg = "linear-gradient(135deg, #7c3aed, #6d28d9)";
+                    badgeText = "ACTIVE";
+                } else if (k.status === "READY") {
+                    badgeBg = "#059669";
+                    badgeText = "READY";
+                } else if (k.status === "RATE_LIMITED") {
+                    badgeBg = "#d97706";
+                    badgeText = `RATE LIMITED — ${k.cooldown_seconds}s`;
+                } else if (k.status === "DISABLED") {
+                    badgeBg = "#9ca3af";
+                    badgeText = "DISABLED";
+                }
+
+                html += `
+                <div style="background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(8px); border: 1px solid ${isStickyActive ? 'rgba(124, 58, 237, 0.4)' : 'rgba(229, 231, 235, 0.8)'}; border-radius: 12px; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; box-shadow: ${isStickyActive ? '0 4px 12px rgba(124, 58, 237, 0.08)' : '0 2px 6px rgba(0,0,0,0.02)'};">
+                    <div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="font-weight: 700; color: #1e1b4b; font-size: 0.95rem;">${k.name}</span>
+                            <span style="background: ${badgeBg}; color: white; font-size: 0.7rem; font-weight: 700; padding: 2px 8px; border-radius: 12px; letter-spacing: 0.5px;">${badgeText}</span>
+                        </div>
+                        <div style="font-family: monospace; font-size: 0.85rem; color: #4b5563; margin-top: 4px;">
+                            ${k.masked_key}
+                            ${isStickyActive ? '<span style="font-size: 0.75rem; color: #7c3aed; font-weight: 600; margin-left: 8px;">(Currently used for transcription)</span>' : ''}
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="testGroqKeyItem('${k.id}')" style="padding: 4px 10px; font-size: 0.78rem;">Test</button>
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="toggleGroqKeyEnabled('${k.id}')" style="padding: 4px 10px; font-size: 0.78rem;">${k.enabled ? 'Disable' : 'Enable'}</button>
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="deleteGroqKeyItem('${k.id}')" style="padding: 4px 10px; font-size: 0.78rem; color: #dc2626;">Delete</button>
+                    </div>
+                </div>`;
+            });
+
+            container.innerHTML = html;
+        }
+
+        // Live countdown timer refresh for rate limited keys
+        setInterval(() => {
+            if (cachedGroqKeys && cachedGroqKeys.some(k => k.status === "RATE_LIMITED")) {
+                loadGroqKeysList();
+            }
+        }, 3000);
+
+        function openAddGroqKeyModal() {
+            document.getElementById("modalGroqKeyId").value = "";
+            document.getElementById("modalGroqKeyName").value = `Groq Key ${(cachedGroqKeys.length + 1)}`;
+            document.getElementById("modalGroqKeyValue").value = "";
+            document.getElementById("modalGroqKeyTestResult").innerHTML = "";
+            document.getElementById("groqKeyModalTitle").innerText = "Add New Groq API Key";
+            document.getElementById("groqKeyModal").style.display = "flex";
+        }
+
+        function closeGroqKeyModal() {
+            document.getElementById("groqKeyModal").style.display = "none";
+        }
+
+        async function testModalGroqKey() {
+            const rawKey = document.getElementById("modalGroqKeyValue").value.trim();
+            const resContainer = document.getElementById("modalGroqKeyTestResult");
+            resContainer.innerHTML = `<span style="color: #6d28d9;">Testing connection...</span>`;
+
+            try {
+                const res = await fetch("/api/settings/test-groq", {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({ groq_api_key: rawKey })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    resContainer.innerHTML = `<span style="color: #059669;">✓ Groq API connection successful.</span>`;
+                } else {
+                    resContainer.innerHTML = `<span style="color: #dc2626;">${data.detail || "Connection failed."}</span>`;
+                }
+            } catch (err) {
+                resContainer.innerHTML = `<span style="color: #dc2626;">Error testing key: ${err.message}</span>`;
+            }
+        }
+
+        async function saveModalGroqKey() {
+            const name = document.getElementById("modalGroqKeyName").value.trim() || "Groq Key";
+            const rawKey = document.getElementById("modalGroqKeyValue").value.trim();
+            const keyId = document.getElementById("modalGroqKeyId").value || ("key_" + Date.now());
+
+            if (!rawKey) {
+                showToast("Invalid Key", "Please enter a valid Groq API Key.", "warning");
+                return;
+            }
+
+            const newEntry = { id: keyId, name: name, key: rawKey, enabled: true };
+            const updatedList = [...cachedGroqKeys.map(k => ({
+                id: k.id,
+                name: k.name,
+                key: k.masked_key,
+                enabled: k.enabled
+            })), newEntry];
+
+            try {
+                const res = await fetch("/api/settings/groq-keys", {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify(updatedList)
+                });
+                if (res.ok) {
+                    showToast("Groq Key Saved", "Groq API key saved successfully.", "success");
+                    closeGroqKeyModal();
+                    loadGroqKeysList();
+                } else {
+                    const err = await res.json();
+                    showToast("Save Error", err.detail || "Failed to save key.", "error");
+                }
+            } catch (err) {
+                showToast("Save Error", "Error saving key: " + err.message, "error");
+            }
+        }
+
+        async function testGroqKeyItem(keyId) {
+            showToast("Testing Connection", "Testing connection to Groq API...", "info", 2000);
+            try {
+                const res = await fetch(`/api/settings/groq-keys/${keyId}/test`, { method: "POST" });
+                const data = await res.json();
+                if (res.ok) {
+                    showToast("Connection Successful", data.message || "✓ Connection successful", "success");
+                } else {
+                    showToast("Connection Failed", data.detail || "✕ Connection failed", "error");
+                }
+            } catch (err) {
+                showToast("Test Error", "Error testing key: " + err.message, "error");
+            }
+        }
+
+        async function toggleGroqKeyEnabled(keyId) {
+            const updatedList = cachedGroqKeys.map(k => ({
+                id: k.id,
+                name: k.name,
+                key: k.masked_key,
+                enabled: k.id === keyId ? !k.enabled : k.enabled
+            }));
+
+            try {
+                const res = await fetch("/api/settings/groq-keys", {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify(updatedList)
+                });
+                if (res.ok) {
+                    loadGroqKeysList();
+                }
+            } catch (err) {
+                console.error("Error toggling key:", err);
+            }
+        }
+
+        async function deleteGroqKeyItem(keyId) {
+            const confirmed = await showConfirmDialog({
+                title: "Delete Groq API Key?",
+                message: "Are you sure you want to delete this Groq API Key configuration?",
+                confirmText: "Delete",
+                cancelText: "Cancel",
+                type: "danger"
+            });
+            if (!confirmed) return;
+
+            try {
+                const res = await fetch(`/api/settings/groq-keys/${keyId}`, { method: "DELETE" });
+                if (res.ok) {
+                    showToast("Groq Key Deleted", "Groq API key removed.", "info");
+                    loadGroqKeysList();
+                } else {
+                    showToast("Delete Error", "Failed to delete Groq key.", "error");
+                }
+            } catch (err) {
+                showToast("Delete Error", "Error deleting key: " + err.message, "error");
+            }
+        }
+    </script>
+</body>
+
+</html>

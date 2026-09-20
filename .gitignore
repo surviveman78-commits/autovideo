@@ -1,0 +1,29 @@
+# AutoVideo Downloads & Outputs (do not push heavy media files, queue or settings to git)
+downloads/*
+!downloads/.gitkeep
+
+# Settings & Secrets (Contains API Keys)
+downloads/settings.json
+downloads/queue.json
+.env
+.env.local
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Temp media files
+*.mp4
+*.mp3
+*.wav
+*.srt
+*.ass
+*.aac
+
+# IDE & OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+scratch/

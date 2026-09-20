@@ -1,0 +1,14 @@
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="av-fav-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8B5CF6" />
+      <stop offset="100%" stop-color="#7C3AED" />
+    </linearGradient>
+  </defs>
+  <rect width="32" height="32" rx="9" fill="url(#av-fav-grad)" />
+  <rect x="0.5" y="0.5" width="31" height="31" rx="8.5" stroke="#FFFFFF" stroke-opacity="0.3" />
+  <!-- Video Play Symbol -->
+  <path d="M10 9.5C10 8.65 10.93 8.13 11.66 8.57L21.16 14.32C21.87 14.75 21.87 15.75 21.16 16.18L11.66 21.93C10.93 22.37 10 21.85 10 21V9.5Z" fill="#FFFFFF" />
+  <!-- AI Spark -->
+  <path d="M22 6C22 7.65 20.65 9 19 9C20.65 9 22 10.35 22 12C22 10.35 23.35 9 25 9C23.35 9 22 7.65 22 6Z" fill="#FFFFFF" />
+</svg>

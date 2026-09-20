@@ -1,0 +1,31 @@
+<svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="av-logo-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8B5CF6" />
+      <stop offset="100%" stop-color="#7C3AED" />
+    </linearGradient>
+    <linearGradient id="av-glass-shine" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.25" />
+      <stop offset="50%" stop-color="#FFFFFF" stop-opacity="0.05" />
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0" />
+    </linearGradient>
+  </defs>
+
+  <!-- Base Rounded Squircle -->
+  <rect x="0" y="0" width="44" height="44" rx="13" fill="url(#av-logo-grad)" />
+  
+  <!-- Subtle Top Glass Shine Overlay -->
+  <rect x="0" y="0" width="44" height="44" rx="13" fill="url(#av-glass-shine)" />
+  
+  <!-- Outer Soft Glass Border -->
+  <rect x="0.5" y="0.5" width="43" height="43" rx="12.5" stroke="#FFFFFF" stroke-opacity="0.3" />
+
+  <!-- Geometric Video Play Symbol -->
+  <path d="M14 13.5C14 12.33 15.28 11.61 16.28 12.21L29.28 19.96C30.26 20.55 30.26 21.95 29.28 22.54L16.28 30.29C15.28 30.89 14 30.17 14 29V13.5Z" fill="#FFFFFF" />
+
+  <!-- Integrated AI Spark / Four-Point Star -->
+  <path d="M31 10C31 12.485 28.985 14.5 26.5 14.5C28.985 14.5 31 16.515 31 19C31 16.515 33.015 14.5 35.5 14.5C33.015 14.5 31 12.485 31 10Z" fill="#FFFFFF" />
+  
+  <!-- Subtle Secondary Micro Spark -->
+  <path d="M14 9C14 10.38 12.88 11.5 11.5 11.5C12.88 11.5 14 12.62 14 14C14 12.62 15.12 11.5 16.5 11.5C15.12 11.5 14 10.38 14 9Z" fill="#FFFFFF" fill-opacity="0.8" />
+</svg>

@@ -1,0 +1,25 @@
+<svg width="240" height="44" viewBox="0 0 240 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="av-hlogo-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8B5CF6" />
+      <stop offset="100%" stop-color="#7C3AED" />
+    </linearGradient>
+    <linearGradient id="av-hglass-shine" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.25" />
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0" />
+    </linearGradient>
+  </defs>
+
+  <!-- Logo Mark -->
+  <g transform="translate(0, 0)">
+    <rect width="44" height="44" rx="13" fill="url(#av-hlogo-grad)" />
+    <rect width="44" height="44" rx="13" fill="url(#av-hglass-shine)" />
+    <rect x="0.5" y="0.5" width="43" height="43" rx="12.5" stroke="#FFFFFF" stroke-opacity="0.3" />
+    <path d="M14 13.5C14 12.33 15.28 11.61 16.28 12.21L29.28 19.96C30.26 20.55 30.26 21.95 29.28 22.54L16.28 30.29C15.28 30.89 14 30.17 14 29V13.5Z" fill="#FFFFFF" />
+    <path d="M31 10C31 12.485 28.985 14.5 26.5 14.5C28.985 14.5 31 16.515 31 19C31 16.515 33.015 14.5 35.5 14.5C33.015 14.5 31 12.485 31 10Z" fill="#FFFFFF" />
+  </g>
+
+  <!-- Typography Wordmark -->
+  <text x="56" y="24" fill="#0F172A" font-family="'Plus Jakarta Sans', sans-serif" font-weight="800" font-size="18" letter-spacing="-0.02em">AutoVideo <tspan fill="#7C3AED">AI</tspan></text>
+  <text x="56" y="37" fill="#64748B" font-family="'Plus Jakarta Sans', sans-serif" font-weight="600" font-size="9" letter-spacing="0.08em">STUDIO QUEUE &amp; CREATIVE ENGINE</text>
+</svg>
