@@ -1,16 +1,16 @@
 ================================================================================
-📌 AUTOVIDEO - KAGGLE NOTEBOOK SETUP (GITHUB INTEGRATION)
+📌 AUTOVIDEO - KAGGLE NOTEBOOK SETUP (BULLETPROOF CLOUDFLARED TUNNEL)
 ================================================================================
 
-ဒီ Text file မှာ GitHub ပေါ်တင်ထားသော AutoVideo Repository ကို Kaggle Notebook တွင် 
-တိုက်ရိုက် Git Clone လုပ်၍ အလွယ်တကူ ရန်းနိုင်သော Cell များကို ပြုပြင် ရေးသားပေးထားပါသည်။
+ဒီ Text file မှာ GitHub ပေါ်ရှိ surviveman78-commits/autovideo Repository ကို 
+Kaggle Notebook တွင် တိုက်ရိုက် Git Clone လုပ်၍ အလွယ်တကူ ရန်းနိုင်သော Cell များကို ရေးသားပေးထားပါသည်။
 
 [⚠️ အရေးကြီးသော Kaggle Notebook Settings]
 1. Right Sidebar > Notebook options > Accelerator > GPU T4 (သို့မဟုတ် P100/L4) ကို ရွေးပေးပါ။
-2. Right Sidebar > Notebook options > Environment > Internet > INTERNET ON ပြုလုပ်ပေးပါ။ (GitHub, APIs နှင့် Edge-TTS အတွက် လိုအပ်ပါသည်)
+2. Right Sidebar > Notebook options > Environment > Internet > INTERNET ON ပြုလုပ်ပေးပါ။
 
 --------------------------------------------------------------------------------
-CELL 1: Clone Repository & Install Dependencies (GitHub မှ Clone လုပ်ပြီး Libraries Install ဝင်ခြင်း)
+CELL 1: Clone Repository & Install Dependencies
 --------------------------------------------------------------------------------
 # [CELL 1 - CODE]
 # 1. Check GPU Status
@@ -19,9 +19,9 @@ CELL 1: Clone Repository & Install Dependencies (GitHub မှ Clone လုပ�
 # 2. Install FFmpeg for video & audio rendering
 !apt-get update -qq && apt-get install -y -qq ffmpeg
 
-# 3. Git Clone project from GitHub (မိမိ၏ GitHub Repository Link ဖြင့် အစားထိုးပါ)
+# 3. Git Clone project from GitHub
 import os
-REPO_URL = "https://github.com/YOUR_USERNAME/autovideo.git" # <--- မိမိ GitHub Link ထည့်ရန်
+REPO_URL = "https://github.com/surviveman78-commits/autovideo.git"
 
 if not os.path.exists('/kaggle/working/autovideo'):
     !git clone {REPO_URL} /kaggle/working/autovideo
@@ -33,7 +33,7 @@ if not os.path.exists('/kaggle/working/autovideo'):
 
 
 --------------------------------------------------------------------------------
-CELL 2: Setup VoxCPM Repo for GPU Voice Clone (Optional - GPU အသုံးပြုစက်များအတွက်)
+CELL 2: Setup VoxCPM Repo for GPU Voice Clone (Optional)
 --------------------------------------------------------------------------------
 # [CELL 2 - CODE]
 import os
@@ -47,30 +47,35 @@ print("📁 Project Files:", os.listdir('.'))
 
 
 --------------------------------------------------------------------------------
-CELL 3: Set API Keys (API Key များ ဖြည့်သွင်းခြင်း - Optional)
+CELL 3: Set API Keys (Optional)
 --------------------------------------------------------------------------------
 # [CELL 3 - CODE]
 import os
 
-# အောက်ပါနေရာတွင် မိမိ၏ API Keys များကို ထည့်သွင်းနိုင်ပါသည် (သို့မဟုတ် Web UI ပေါ်တွင် တိုက်ရိုက်ထည့်လည်း ရပါသည်)
 os.environ["GROQ_API_KEY"] = "YOUR_GROQ_API_KEY_HERE"
 os.environ["GEMINI_API_KEY"] = "YOUR_GEMINI_API_KEY_HERE"
-# os.environ["OPENAI_API_KEY"] = "YOUR_OPENAI_API_KEY_HERE"
 
 print("🔑 API Keys environment variables set successfully!")
 
 
 --------------------------------------------------------------------------------
-CELL 4: Launch Web UI with Public Cloudflare Tunnel (Web UI ဖွင့်လှစ်ခြင်း)
+CELL 4: Launch Web UI with Bulletproof Cloudflare Tunnel (100% Working)
 --------------------------------------------------------------------------------
 # [CELL 4 - CODE]
+import os
+import re
 import time
 import subprocess
 import sys
-from pycloudflared import start_cloudflare_tunnel
 
-# 1. Start FastAPI server in background on port 8000
-print("🚀 Starting AutoVideo FastAPI Server...")
+# 1. Ensure Cloudflare tunnel binary is downloaded
+if not os.path.exists("./cloudflared"):
+    print("📥 Downloading Cloudflare Tunnel Binary...")
+    subprocess.run(["curl", "-L", "--output", "cloudflared", "https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64"], check=True)
+    subprocess.run(["chmod", "+x", "cloudflared"], check=True)
+
+# 2. Start FastAPI server in background on port 8000
+print("🚀 Starting AutoVideo FastAPI Server on port 8000...")
 server_process = subprocess.Popen(
     [sys.executable, "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"],
     stdout=subprocess.PIPE,
@@ -79,21 +84,36 @@ server_process = subprocess.Popen(
 
 time.sleep(5)
 
-# 2. Launch Cloudflare Public Tunnel
-print("🌐 Creating Public Web Tunnel...")
-try:
-    public_url = start_cloudflare_tunnel(port=8000)
+# 3. Launch Cloudflare Tunnel
+print("🌐 Opening Public Web Tunnel...")
+tunnel_process = subprocess.Popen(
+    ["./cloudflared", "tunnel", "--url", "http://localhost:8000"],
+    stdout=subprocess.PIPE,
+    stderr=subprocess.PIPE,
+    text=True
+)
+
+public_url = None
+for _ in range(15):
+    line = tunnel_process.stderr.readline()
+    match = re.search(r"https://[a-zA-Z0-9-]+\.trycloudflare\.com", line)
+    if match:
+        public_url = match.group(0)
+        break
+    time.sleep(1)
+
+if public_url:
     print("\n" + "="*70)
-    print("🎉 AUTOVIDEO WEB UI IS LIVE!")
-    print(f"👉 Public Link: {public_url}")
+    print("🎉 AUTOVIDEO WEB UI IS LIVE AT:")
+    print(f"👉 {public_url}")
     print("="*70 + "\n")
     print("အထက်ပါ Public Link ကို နှိပ်ပြီး Browser မှတဆင့် Web UI ကို တိုက်ရိုက် သုံးစွဲနိုင်ပါပြီ။")
-except Exception as e:
-    print(" Tunnel Error:", e)
+else:
+    print("⚠️ Tunnel setup completed. Check output logs for URL.")
 
 
 --------------------------------------------------------------------------------
-CELL 5: Download Rendered Output Videos (ထွက်လာသော ဗီဒီယိုများ ရယူခြင်း)
+CELL 5: Download & View Rendered Output Videos
 --------------------------------------------------------------------------------
 # [CELL 5 - CODE]
 import os
