@@ -1,5 +1,5 @@
 ================================================================================
-📌 AUTOVIDEO - KAGGLE NOTEBOOK SETUP (BULLETPROOF CLOUDFLARED TUNNEL)
+📌 AUTOVIDEO - KAGGLE NOTEBOOK SETUP (DNS RESOLVE FIXED)
 ================================================================================
 
 ဒီ Text file မှာ GitHub ပေါ်ရှိ surviveman78-commits/autovideo Repository ကို 
@@ -59,7 +59,7 @@ print("🔑 API Keys environment variables set successfully!")
 
 
 --------------------------------------------------------------------------------
-CELL 4: Launch Web UI with Bulletproof Cloudflare Tunnel (100% Working)
+CELL 4: Launch Web UI with Reliable Cloudflare Tunnel (Fixed DNS & Wait Time)
 --------------------------------------------------------------------------------
 # [CELL 4 - CODE]
 import os
@@ -68,7 +68,7 @@ import time
 import subprocess
 import sys
 
-# 1. Ensure Cloudflare tunnel binary is downloaded
+# 1. Ensure Cloudflare Tunnel Binary is downloaded
 if not os.path.exists("./cloudflared"):
     print("📥 Downloading Cloudflare Tunnel Binary...")
     subprocess.run(["curl", "-L", "--output", "cloudflared", "https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64"], check=True)
@@ -76,40 +76,48 @@ if not os.path.exists("./cloudflared"):
 
 # 2. Start FastAPI server in background on port 8000
 print("🚀 Starting AutoVideo FastAPI Server on port 8000...")
-server_process = subprocess.Popen(
-    [sys.executable, "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"],
-    stdout=subprocess.PIPE,
-    stderr=subprocess.PIPE
-)
+with open("uvicorn.log", "w") as uvicorn_log:
+    server_process = subprocess.Popen(
+        [sys.executable, "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"],
+        stdout=uvicorn_log,
+        stderr=uvicorn_log
+    )
 
-time.sleep(5)
+time.sleep(4)
 
-# 3. Launch Cloudflare Tunnel
+# 3. Launch Cloudflare Tunnel logging to cloudflared.log
 print("🌐 Opening Public Web Tunnel...")
-tunnel_process = subprocess.Popen(
-    ["./cloudflared", "tunnel", "--url", "http://localhost:8000"],
-    stdout=subprocess.PIPE,
-    stderr=subprocess.PIPE,
-    text=True
-)
+with open("cloudflared.log", "w") as cf_log:
+    tunnel_process = subprocess.Popen(
+        ["./cloudflared", "tunnel", "--url", "http://localhost:8000"],
+        stdout=cf_log,
+        stderr=cf_log
+    )
 
+print("⏳ Establishing tunnel & registering DNS (waiting 6s)...")
+time.sleep(6)
+
+# Read cloudflared.log to find the active URL
 public_url = None
-for _ in range(15):
-    line = tunnel_process.stderr.readline()
-    match = re.search(r"https://[a-zA-Z0-9-]+\.trycloudflare\.com", line)
-    if match:
-        public_url = match.group(0)
-        break
-    time.sleep(1)
+if os.path.exists("cloudflared.log"):
+    with open("cloudflared.log", "r") as f:
+        content = f.read()
+        urls = re.findall(r"https://[a-zA-Z0-9-]+\.trycloudflare\.com", content)
+        if urls:
+            public_url = urls[-1]
 
 if public_url:
     print("\n" + "="*70)
     print("🎉 AUTOVIDEO WEB UI IS LIVE AT:")
     print(f"👉 {public_url}")
+    print("="*70)
+    print("⚠️ NOTE: If you see 'DNS_PROBE_FINISHED_NXDOMAIN', please wait 10-15 seconds for Cloudflare DNS to propagate globally, then refresh the page!")
     print("="*70 + "\n")
-    print("အထက်ပါ Public Link ကို နှိပ်ပြီး Browser မှတဆင့် Web UI ကို တိုက်ရိုက် သုံးစွဲနိုင်ပါပြီ။")
 else:
-    print("⚠️ Tunnel setup completed. Check output logs for URL.")
+    print("⚠️ Could not extract URL automatically. Check cloudflared.log below:")
+    if os.path.exists("cloudflared.log"):
+        with open("cloudflared.log", "r") as f:
+            print(f.read())
 
 
 --------------------------------------------------------------------------------
