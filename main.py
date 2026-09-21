@@ -132,6 +132,10 @@ DOWNLOAD_URL_CACHE: Dict[str, str] = {}
 def process_video_download(url: str, file_id: str, resolution: str = "4k") -> str:
     """Downloads video in highest available resolution with MP4 merging, reusing cached downloads."""
     clean_url = url.strip()
+    if os.path.exists(clean_url) and os.path.getsize(clean_url) > 0:
+        print(f"[Video Download] Input URL is an existing local file on disk: {clean_url}")
+        return clean_url
+
     if clean_url in DOWNLOAD_URL_CACHE:
         cached_file = DOWNLOAD_URL_CACHE[clean_url]
         if os.path.exists(cached_file):

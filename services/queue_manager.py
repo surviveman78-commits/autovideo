@@ -351,31 +351,42 @@ class QueueManager:
             job.started_at = time.time()
 
             # ----------------------------------------------------
-            # Stage 1: DOWNLOADING (10%)
+            # Stage 1: DOWNLOADING / PREPARING (10%)
             # ----------------------------------------------------
             if is_cancelled(): return
-            video_path = str(source_dir / f"vid_{job_id}.mp4")
-            if not (os.path.exists(video_path) and os.path.getsize(video_path) > 1000):
-                from main import VIDEO_DIR
-                matching_files = list(VIDEO_DIR.glob(f"vid_{job_id}.*"))
-                if matching_files and os.path.exists(matching_files[0]) and os.path.getsize(matching_files[0]) > 1000:
-                    video_path = str(matching_files[0])
-                else:
-                    video_path = None
+            video_path = None
 
-            if video_path and os.path.exists(video_path) and os.path.getsize(video_path) > 1000:
-                self._log_job_message(log_file, f"Stage 1 Checkpoint: Using existing downloaded video file: {video_path}")
-                self.update_job_progress(job_id, "DOWNLOADING", 10, "📥 Using Existing Downloaded Video File...")
-                job.title = Path(video_path).stem.replace(f"vid_{job_id}", "Video Task")
+            # Check 1: Is job.url an existing local file on disk (e.g. uploaded video)?
+            if job.url and os.path.exists(job.url) and os.path.getsize(job.url) > 1000:
+                video_path = job.url
+                self._log_job_message(log_file, f"Stage 1: Using uploaded local video file: {video_path}")
+                self.update_job_progress(job_id, "DOWNLOADING", 10, "📥 Preparing Uploaded Local Video File...")
+                clean_title = Path(video_path).stem.replace("upload_", "").replace(f"vid_{job_id}", "")
+                job.title = f"Local Video ({clean_title})" if clean_title else "Local Uploaded Video"
             else:
-                self.update_job_progress(job_id, "DOWNLOADING", 10, "📥 Downloading Video File (yt-dlp)...")
-                self._log_job_message(log_file, "Stage 1: Downloading video via yt-dlp...")
-                from main import process_video_download
-                video_path = process_video_download(job.url, f"vid_{job_id}", resolution=settings.resolution.split("x")[0] if "x" in settings.resolution else "4k")
-                if not os.path.exists(video_path):
-                    raise FileNotFoundError(f"Video file not found after download: {video_path}")
-                job.title = Path(video_path).stem.replace(f"vid_{job_id}", "Video Task")
-                self._log_job_message(log_file, f"Video downloaded successfully: {video_path}")
+                # Check 2: Checkpoint file vid_{job_id}.mp4
+                candidate_path = str(source_dir / f"vid_{job_id}.mp4")
+                if os.path.exists(candidate_path) and os.path.getsize(candidate_path) > 1000:
+                    video_path = candidate_path
+                else:
+                    from main import VIDEO_DIR
+                    matching_files = list(VIDEO_DIR.glob(f"vid_{job_id}.*"))
+                    if matching_files and os.path.exists(matching_files[0]) and os.path.getsize(matching_files[0]) > 1000:
+                        video_path = str(matching_files[0])
+
+                if video_path and os.path.exists(video_path) and os.path.getsize(video_path) > 1000:
+                    self._log_job_message(log_file, f"Stage 1 Checkpoint: Using existing downloaded video file: {video_path}")
+                    self.update_job_progress(job_id, "DOWNLOADING", 10, "📥 Using Existing Downloaded Video File...")
+                    job.title = Path(video_path).stem.replace(f"vid_{job_id}", "Video Task")
+                else:
+                    self.update_job_progress(job_id, "DOWNLOADING", 10, "📥 Downloading Video File (yt-dlp)...")
+                    self._log_job_message(log_file, "Stage 1: Downloading video via yt-dlp...")
+                    from main import process_video_download
+                    video_path = process_video_download(job.url, f"vid_{job_id}", resolution=settings.resolution.split("x")[0] if "x" in settings.resolution else "4k")
+                    if not os.path.exists(video_path):
+                        raise FileNotFoundError(f"Video file not found after download: {video_path}")
+                    job.title = Path(video_path).stem.replace(f"vid_{job_id}", "Video Task")
+                    self._log_job_message(log_file, f"Video downloaded successfully: {video_path}")
 
             # ----------------------------------------------------
             # Stage 2: EXTRACTING_AUDIO (20%)
