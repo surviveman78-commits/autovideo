@@ -41,6 +41,7 @@ import os
 # Clone VoxCPM repository if you want to use local GPU Voice Clone engine
 if not os.path.exists('VoxCPM'):
     !git clone https://github.com/OpenBMB/VoxCPM.git
+    !pip install -q -e VoxCPM
 
 print(" Current Working Directory:", os.getcwd())
 print("📁 Project Files:", os.listdir('.'))
@@ -67,6 +68,11 @@ import re
 import time
 import subprocess
 import sys
+
+# 0. Clean up any previous background processes to free up port 8000
+subprocess.run("pkill -9 -f uvicorn || true", shell=True)
+subprocess.run("pkill -9 -f cloudflared || true", shell=True)
+time.sleep(1)
 
 # 1. Ensure Cloudflare Tunnel Binary is downloaded
 if not os.path.exists("./cloudflared"):
@@ -114,8 +120,13 @@ if public_url:
     print("⚠️ NOTE: If you see 'DNS_PROBE_FINISHED_NXDOMAIN', please wait 10-15 seconds for Cloudflare DNS to propagate globally, then refresh the page!")
     print("="*70 + "\n")
 else:
-    print("⚠️ Could not extract URL automatically. Check cloudflared.log below:")
+    print("⚠️ Could not extract URL automatically. Checking logs below:")
+    if os.path.exists("uvicorn.log"):
+        print("--- uvicorn.log ---")
+        with open("uvicorn.log", "r") as f:
+            print(f.read())
     if os.path.exists("cloudflared.log"):
+        print("--- cloudflared.log ---")
         with open("cloudflared.log", "r") as f:
             print(f.read())
 
