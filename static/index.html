@@ -973,9 +973,13 @@
             </div>
 
             <div class="input-row">
-                <input type="url" id="videoUrlInput" class="input-url" placeholder="https://www.youtube.com/watch?v=..." onkeydown="if(event.key === 'Enter') addVideoToQueue()">
+                <input type="url" id="videoUrlInput" class="input-url" placeholder="https://www.youtube.com/watch?v=... (or paste file path)" onkeydown="if(event.key === 'Enter') addVideoToQueue()">
                 <button class="btn-primary" onclick="addVideoToQueue()">
                     <span>+ ADD TO QUEUE</span>
+                </button>
+                <input type="file" id="videoFileInput" accept="video/*" style="display:none;" onchange="uploadLocalVideoFile(this)">
+                <button class="btn-secondary" onclick="document.getElementById('videoFileInput').click()" style="padding: 10px 16px; border-radius: 12px; font-weight: 700; background: rgba(124, 58, 237, 0.08); color: var(--accent-primary); border: 1.5px solid var(--accent-light-border); white-space: nowrap; cursor: pointer;">
+                    <span>📁 Upload File</span>
                 </button>
             </div>
             <div id="urlMessageBanner" style="display:none; margin-top:10px; font-size:0.83rem; padding:8px 12px; border-radius:8px;"></div>
@@ -2009,6 +2013,48 @@
                 }
             } catch (err) {
                 showToast("Connection Error", "Failed to connect to server: " + err.message, "error");
+            }
+        }
+
+        async function uploadLocalVideoFile(inputEl) {
+            if (!inputEl.files || !inputEl.files.length) return;
+            const file = inputEl.files[0];
+            const formData = new FormData();
+            formData.append("file", file);
+
+            showToast("Uploading Video...", `Uploading ${file.name} to server...`, "info", 4000);
+
+            try {
+                const res = await fetch("/api/upload", {
+                    method: "POST",
+                    body: formData
+                });
+                const data = await res.json();
+                if (res.ok && data.status === "success" && data.video_path) {
+                    showToast("Upload Completed", `Video ${file.name} uploaded successfully. Adding to queue...`, "success");
+                    // Add uploaded file path directly to processing queue
+                    const qRes = await fetch("/api/queue/add", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "X-Client-ID": getClientId()
+                        },
+                        body: JSON.stringify({ url: data.video_path, mode: currentPipelineMode, client_id: getClientId() })
+                    });
+                    const qData = await qRes.json();
+                    if (qRes.ok && qData.status === "success") {
+                        showToast("Video Queued", `Local video file added to queue.`, "info");
+                        fetchQueueJobs();
+                    } else {
+                        showToast("Queue Error", qData.detail || "Could not add uploaded file to queue.", "error");
+                    }
+                } else {
+                    showToast("Upload Error", data.detail || "Failed to upload video file.", "error");
+                }
+            } catch (err) {
+                showToast("Upload Failed", "Error uploading video: " + err.message, "error");
+            } finally {
+                inputEl.value = "";
             }
         }
 
