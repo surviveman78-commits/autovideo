@@ -611,14 +611,16 @@ def render_recap_video_gpu(
 
     # Audio mapping & mixing filter
     filter_complex = None
+    should_mix_audio = (mode == "dubbing" and bool(segments)) or keep_original_audio
+
     if mode == "dubbing" and segments:
         duck_conditions = " + ".join([f"between(t,{float(s.get('start',0)):.3f},{float(s.get('end',0)):.3f})" for s in segments if s.get('start') is not None])
         if duck_conditions:
-            filter_complex = f"[0:a]volume=eval=frame:volume='if({duck_conditions},0.05,1.0)'[orig];[1:a]volume=1.0[tts];[orig][tts]amix=inputs=2:duration=first[aout]"
+            filter_complex = f"[0:a]volume=eval=frame:volume='if({duck_conditions},0.12,1.0)'[orig];[1:a]volume=1.0[tts];[orig][tts]amix=inputs=2:duration=first:dropout_transition=0:normalize=0[aout]"
         else:
-            filter_complex = "[0:a]volume=0.05[orig];[1:a]volume=1.0[tts];[orig][tts]amix=inputs=2:duration=first[aout]"
+            filter_complex = "[0:a]volume=0.12[orig];[1:a]volume=1.0[tts];[orig][tts]amix=inputs=2:duration=first:dropout_transition=0:normalize=0[aout]"
     elif keep_original_audio:
-        filter_complex = f"[0:a]volume={original_audio_volume}[orig];[1:a]volume=1.0[tts];[orig][tts]amix=inputs=2:duration=first[aout]"
+        filter_complex = f"[0:a]volume={original_audio_volume}[orig];[1:a]volume=1.0[tts];[orig][tts]amix=inputs=2:duration=first:dropout_transition=0:normalize=0[aout]"
 
     # Helper function to run ffmpeg command
     def build_cmd(encoder_name: str, extra_args: list = None) -> list:
@@ -627,7 +629,7 @@ def render_recap_video_gpu(
         if extra_args:
             c.extend(extra_args)
         c.extend(["-vf", vf_str])
-        if keep_original_audio and filter_complex:
+        if should_mix_audio and filter_complex:
             c.extend(["-filter_complex", filter_complex, "-map", "0:v", "-map", "[aout]"])
         else:
             c.extend(["-map", "0:v", "-map", "1:a"])

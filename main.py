@@ -477,7 +477,9 @@ async def process_recap_video(req: RecapProcessRequest):
                 sub_shadow_strength=req.sub_shadow_strength,
                 sub_alignment=req.sub_alignment,
                 sub_x=req.sub_x,
-                sub_y=req.sub_y
+                sub_y=req.sub_y,
+                mode=req.mode,
+                segments=seg_with_audio
             )
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Video rendering error: {str(e)}")
