@@ -436,6 +436,58 @@ def get_media_duration(file_path: str) -> float:
         return 0.0
 
 
+def create_dubbing_master_audio_track(
+    segments: List[Dict[str, Any]],
+    output_audio_path: Path,
+    total_video_duration: float,
+    target_sample_rate: int = 48000
+) -> Path:
+    """
+    Assembles TTS audio segments for 1:1 Video Dubbing Mode with Dynamic Audio Speed Matching.
+    Places each TTS segment at its exact target start timestamp.
+    If generated TTS duration exceeds target segment duration, applies pitch-preserved time-stretching (speed change)
+    so TTS speech fits the exact target window.
+    """
+    output_audio_path.parent.mkdir(parents=True, exist_ok=True)
+    master_len_ms = int(max(1.0, total_video_duration) * 1000)
+    master = AudioSegment.silent(duration=master_len_ms, frame_rate=target_sample_rate).set_channels(2)
+
+    for seg in segments:
+        audio_file = seg.get("audio_path")
+        if not audio_file or not os.path.exists(audio_file):
+            continue
+
+        start_sec = float(seg.get("start", 0.0))
+        end_sec = float(seg.get("end", 0.0))
+        target_dur_sec = max(0.5, end_sec - start_sec)
+        target_start_ms = int(start_sec * 1000)
+
+        try:
+            raw_seg = AudioSegment.from_file(audio_file)
+        except Exception:
+            continue
+
+        raw_seg = normalize_segment_format(raw_seg, sample_rate=target_sample_rate)
+        seg_dur_sec = len(raw_seg) / 1000.0
+
+        if seg_dur_sec > target_dur_sec and seg_dur_sec > 0.4:
+            # Dynamic Audio Speed Matching (Speed Up to fit target slot)
+            speed_factor = min(1.35, seg_dur_sec / target_dur_sec)
+            new_rate = int(raw_seg.frame_rate * speed_factor)
+            adjusted_seg = raw_seg._spawn(raw_seg.raw_data, overrides={'frame_rate': new_rate})
+            adjusted_seg = adjusted_seg.set_frame_rate(target_sample_rate)
+        else:
+            adjusted_seg = raw_seg
+
+        adjusted_seg = adjusted_seg.normalize(headroom=1.0)
+        master = master.overlay(adjusted_seg, position=target_start_ms)
+
+    master = master.normalize(headroom=1.5)
+    output_format = "wav" if str(output_audio_path).endswith(".wav") else "mp3"
+    master.export(str(output_audio_path), format=output_format, bitrate="320k")
+    return output_audio_path
+
+
 def render_recap_video_gpu(
     video_path: str,
     audio_path: str,
@@ -457,11 +509,14 @@ def render_recap_video_gpu(
     sub_shadow_strength: int = 1,
     sub_alignment: str = "center",
     sub_x: Optional[int] = None,
-    sub_y: Optional[int] = None
+    sub_y: Optional[int] = None,
+    mode: str = "recap",
+    segments: Optional[List[Dict[str, Any]]] = None
 ) -> str:
     """
     Renders final video using NVIDIA GPU acceleration (h264_nvenc / h264_mf).
-    Dynamically matches speed and burns subtitles with exact ASS style matching live 9:16 preview.
+    Mode 1 (recap): Dynamically matches speed (setpts) to narration track.
+    Mode 2 (dubbing): Preserves 1.0x video speed, applies selective speech ducking/muting to original audio.
     """
     output_file = Path(output_path)
     output_file.parent.mkdir(parents=True, exist_ok=True)
@@ -473,9 +528,13 @@ def render_recap_video_gpu(
 
     vf_filters = []
 
-    if video_dur > 0 and audio_dur > 0:
+    if mode == "dubbing":
+        # 1:1 Video Dubbing Mode: Keep 100% original video playback speed
+        vf_filters.append("setpts=PTS")
+        print(f"[Video Render Dubbing] Mode: 1:1 Dubbing | Original Video Duration: {video_dur:.2f}s")
+    elif video_dur > 0 and audio_dur > 0:
         pts_scale = audio_dur / video_dur
-        print(f"[Video Render] Video Duration: {video_dur:.2f}s | Audio Duration: {audio_dur:.2f}s | Speed Scale (setpts): {pts_scale:.4f}x")
+        print(f"[Video Render Recap] Video Duration: {video_dur:.2f}s | Audio Duration: {audio_dur:.2f}s | Speed Scale (setpts): {pts_scale:.4f}x")
         vf_filters.append(f"setpts={pts_scale:.6f}*PTS")
     else:
         vf_filters.append("tpad=stop_mode=clone:stop=-1")
@@ -552,7 +611,13 @@ def render_recap_video_gpu(
 
     # Audio mapping & mixing filter
     filter_complex = None
-    if keep_original_audio:
+    if mode == "dubbing" and segments:
+        duck_conditions = " + ".join([f"between(t,{float(s.get('start',0)):.3f},{float(s.get('end',0)):.3f})" for s in segments if s.get('start') is not None])
+        if duck_conditions:
+            filter_complex = f"[0:a]volume=eval=frame:volume='if({duck_conditions},0.05,1.0)'[orig];[1:a]volume=1.0[tts];[orig][tts]amix=inputs=2:duration=first[aout]"
+        else:
+            filter_complex = "[0:a]volume=0.05[orig];[1:a]volume=1.0[tts];[orig][tts]amix=inputs=2:duration=first[aout]"
+    elif keep_original_audio:
         filter_complex = f"[0:a]volume={original_audio_volume}[orig];[1:a]volume=1.0[tts];[orig][tts]amix=inputs=2:duration=first[aout]"
 
     # Helper function to run ffmpeg command

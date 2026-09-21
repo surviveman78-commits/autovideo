@@ -88,8 +88,8 @@ class RecapProcessRequest(BaseModel):
     ai_api_key: Optional[str] = None
     ai_provider: str = "gemini"     # "gemini" or "openai"
     target_language: str = "Burmese"
-    mode: str = "full"              # "full" or "recap"
-    voice: str = "voxcpm2-clone"
+    mode: str = "recap"              # "recap" (🔥 TikTok Story Recap) or "dubbing" (🎙️ 1:1 Video Dubbing)
+    voice: str = "f5-myanmar-v2"
     custom_voice_file: Optional[str] = None
     keep_original_audio: bool = False
     original_audio_volume: float = 0.1

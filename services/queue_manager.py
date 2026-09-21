@@ -427,21 +427,37 @@ class QueueManager:
                     translated_segments = None
 
             if not translated_segments:
-                self.update_job_progress(job_id, "TRANSLATING", 50, f"🤖 AI Script Rewriting & Translating ({settings.translation_style} style)...")
-                self._log_job_message(log_file, f"Stage 4: AI Translation to {settings.target_language} ({settings.translation_style} style)...")
-                from services.translator import translate_transcript
-                live_settings = SettingsManager.get_instance().load_settings()
-                ai_key = live_settings.gemini_api_key if settings.ai_provider == "gemini" else live_settings.openai_api_key
-                if not ai_key or is_masked(ai_key):
-                    ai_key = settings.gemini_api_key if settings.ai_provider == "gemini" else settings.openai_api_key
-                translated_segments = translate_transcript(
-                    segments=segments,
-                    target_language=settings.target_language,
-                    mode="full" if settings.script_rewriting_enabled else "full",
-                    translation_style=settings.translation_style,
-                    provider=settings.ai_provider,
-                    api_key=ai_key
-                )
+                is_dubbing = getattr(settings, "mode", "recap") == "dubbing" or getattr(job, "mode", "recap") == "dubbing"
+                if is_dubbing:
+                    self.update_job_progress(job_id, "TRANSLATING", 50, f"🎙️ 1:1 Video Dubbing Translation to {settings.target_language}...")
+                    self._log_job_message(log_file, f"Stage 4: 1:1 Dubbing Translation to {settings.target_language}...")
+                    from services.translator import translate_transcript_1to1_dubbing
+                    live_settings = SettingsManager.get_instance().load_settings()
+                    ai_key = live_settings.gemini_api_key if settings.ai_provider == "gemini" else live_settings.openai_api_key
+                    if not ai_key or is_masked(ai_key):
+                        ai_key = settings.gemini_api_key if settings.ai_provider == "gemini" else settings.openai_api_key
+                    translated_segments = translate_transcript_1to1_dubbing(
+                        segments=segments,
+                        target_language=settings.target_language,
+                        provider=settings.ai_provider,
+                        api_key=ai_key
+                    )
+                else:
+                    self.update_job_progress(job_id, "TRANSLATING", 50, f"🤖 AI Script Rewriting & Translating ({settings.translation_style} style)...")
+                    self._log_job_message(log_file, f"Stage 4: AI Translation to {settings.target_language} ({settings.translation_style} style)...")
+                    from services.translator import translate_transcript
+                    live_settings = SettingsManager.get_instance().load_settings()
+                    ai_key = live_settings.gemini_api_key if settings.ai_provider == "gemini" else live_settings.openai_api_key
+                    if not ai_key or is_masked(ai_key):
+                        ai_key = settings.gemini_api_key if settings.ai_provider == "gemini" else settings.openai_api_key
+                    translated_segments = translate_transcript(
+                        segments=segments,
+                        target_language=settings.target_language,
+                        mode="full" if settings.script_rewriting_enabled else "full",
+                        translation_style=settings.translation_style,
+                        provider=settings.ai_provider,
+                        api_key=ai_key
+                    )
                 with open(translated_json_path, "w", encoding="utf-8") as f:
                     json.dump(translated_segments, f, ensure_ascii=False, indent=2)
                 self._log_job_message(log_file, "AI Translation completed & saved checkpoint successfully.")
@@ -507,15 +523,26 @@ class QueueManager:
                     finally:
                         loop.close()
 
-                    create_master_audio_track(
-                        segments=seg_with_audio,
-                        output_audio_path=master_tts_audio,
-                        target_sample_rate=target_sr,
-                        audio_normalization=getattr(settings, "audio_normalization", True),
-                        smooth_segment_join=getattr(settings, "smooth_segment_join", True),
-                        silence_cleanup=getattr(settings, "silence_cleanup", True),
-                        auto_audio_validation=getattr(settings, "auto_audio_validation", True)
-                    )
+                    is_dubbing = getattr(settings, "mode", "recap") == "dubbing" or getattr(job, "mode", "recap") == "dubbing"
+                    if is_dubbing:
+                        from services.processor import create_dubbing_master_audio_track, get_media_duration
+                        total_vid_dur = get_media_duration(video_path)
+                        create_dubbing_master_audio_track(
+                            segments=seg_with_audio,
+                            output_audio_path=master_tts_audio,
+                            total_video_duration=total_vid_dur,
+                            target_sample_rate=target_sr
+                        )
+                    else:
+                        create_master_audio_track(
+                            segments=seg_with_audio,
+                            output_audio_path=master_tts_audio,
+                            target_sample_rate=target_sr,
+                            audio_normalization=getattr(settings, "audio_normalization", True),
+                            smooth_segment_join=getattr(settings, "smooth_segment_join", True),
+                            silence_cleanup=getattr(settings, "silence_cleanup", True),
+                            auto_audio_validation=getattr(settings, "auto_audio_validation", True)
+                        )
                 else:
                     # ----------------------------------------------------
                     # VoxCPM2 Voice Clone Long-Text Pipeline (~20s Chunks)
@@ -603,6 +630,8 @@ class QueueManager:
             output_video_file = output_dir / f"recap_{job_id}.mp4"
             final_video_public = RECAP_DIR / f"recap_{job_id}.mp4"
 
+            job_mode = "dubbing" if (getattr(settings, "mode", "recap") == "dubbing" or getattr(job, "mode", "recap") == "dubbing") else "recap"
+
             final_video_path = render_recap_video_gpu(
                 video_path=video_path,
                 audio_path=str(master_tts_audio),
@@ -624,7 +653,9 @@ class QueueManager:
                 sub_shadow_strength=getattr(settings, "sub_shadow_strength", 1),
                 sub_alignment=getattr(settings, "sub_alignment", "center"),
                 sub_x=getattr(settings, "sub_x", None),
-                sub_y=getattr(settings, "sub_y", None)
+                sub_y=getattr(settings, "sub_y", None),
+                mode=job_mode,
+                segments=seg_with_audio
             )
 
             shutil.copyfile(output_video_file, final_video_public)

@@ -33,15 +33,13 @@ if not os.path.exists('/kaggle/working/autovideo'):
 
 
 --------------------------------------------------------------------------------
-CELL 2: Setup VoxCPM Repo for GPU Voice Clone (Optional)
+CELL 2: Setup F5-Myanmar TTS v2 Engine for GPU Voice Clone (Optional)
 --------------------------------------------------------------------------------
 # [CELL 2 - CODE]
 import os
 
-# Clone VoxCPM repository if you want to use local GPU Voice Clone engine
-if not os.path.exists('VoxCPM'):
-    !git clone https://github.com/OpenBMB/VoxCPM.git
-    !pip install -q -e VoxCPM
+# Install F5-TTS for Burmese GPU Voice Cloning
+!pip install -q f5-tts
 
 print(" Current Working Directory:", os.getcwd())
 print("📁 Project Files:", os.listdir('.'))

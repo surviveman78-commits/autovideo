@@ -304,3 +304,81 @@ Return ONLY a valid JSON array of 3 option objects.
     ]
 
 
+DUBBING_1TO1_INSTRUCTIONS = """You are an expert video voiceover translator specializing in 1:1 Video Dubbing into Burmese.
+
+Your task is to translate each transcript segment 1:1 into clear, concise Burmese while preserving 100% of the original spoken meaning and line structure.
+
+Guidelines for Dubbing:
+- Translate EVERY segment 1:1 without omitting or summarizing sentences.
+- Keep Burmese translation concise so spoken TTS duration naturally matches the original speech length.
+- Preserve exact "start" and "end" timestamps for each segment in the JSON output.
+- Return strictly a valid JSON array of objects, where each object contains "start", "end", and translated "text".
+"""
+
+
+def translate_transcript_1to1_dubbing(
+    segments: List[Dict[str, Any]],
+    target_language: str = "Burmese",
+    provider: str = "gemini",
+    api_key: Optional[str] = None
+) -> List[Dict[str, Any]]:
+    """
+    Translates transcript segments 1:1 line-by-line for Video Dubbing Mode,
+    preserving exact segment timestamps and 100% original meaning without script summarization.
+    """
+    gemini_key = api_key or os.getenv("GEMINI_API_KEY")
+    openai_key = api_key or os.getenv("OPENAI_API_KEY")
+
+    prompt = f"""{DUBBING_1TO1_INSTRUCTIONS}
+
+Target Language: {target_language}
+Transcript Segments:
+{json.dumps(segments, ensure_ascii=False)}
+
+Translate each segment into concise, spoken {target_language} for video dubbing.
+Return ONLY a valid JSON array of segment objects with "start", "end", and "text".
+"""
+
+    if provider == "openai" and openai_key:
+        try:
+            client = OpenAI(api_key=openai_key)
+            response = client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[
+                    {"role": "system", "content": DUBBING_1TO1_INSTRUCTIONS},
+                    {"role": "user", "content": prompt}
+                ],
+                response_format={"type": "json_object"}
+            )
+            content = response.choices[0].message.content
+            data = json.loads(content)
+            if isinstance(data, dict):
+                for val in data.values():
+                    if isinstance(val, list):
+                        return val
+            if isinstance(data, list):
+                return data
+        except Exception as e:
+            print(f"OpenAI 1:1 Dubbing translation error: {e}")
+
+    if gemini_key:
+        try:
+            client = genai.Client(api_key=gemini_key)
+            response = client.models.generate_content(
+                model="gemini-2.5-flash",
+                contents=prompt,
+                config=types.GenerateContentConfig(
+                    response_mime_type="application/json"
+                )
+            )
+            translated = json.loads(response.text)
+            if isinstance(translated, list):
+                return translated
+        except Exception as e:
+            print(f"Gemini 1:1 Dubbing translation error: {e}")
+
+    # Fallback to direct text copy if AI translation fails
+    return [dict(s) for s in segments]
+
+
+

@@ -54,6 +54,9 @@ class Settings(BaseModel):
     viral_hook_enabled: bool = True
     script_length_control: str = "concise"
 
+    # Mode Settings
+    mode: str = "recap"  # "recap" (🔥 TikTok Story Recap) or "dubbing" (🎙️ 1:1 Video Dubbing)
+
     # Voice Settings
     voice_engine: str = "edge_tts"  # "edge_tts" or "voice_clone"
     voice_provider: str = "edge"    # "edge" or "voxcpm"
