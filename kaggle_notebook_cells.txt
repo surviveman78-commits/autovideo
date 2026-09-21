@@ -60,6 +60,72 @@ print("🔑 API Keys environment variables set successfully!")
 
 
 --------------------------------------------------------------------------------
+CELL 3.5: Upload Local Video File or Copy from Kaggle Dataset (Optional)
+--------------------------------------------------------------------------------
+# [CELL 3.5 - CODE]
+import os
+import shutil
+
+# Option A: If you uploaded a video via Kaggle 'Add Data' (/kaggle/input/...), set path below:
+KAGGLE_INPUT_VIDEO = ""  # Example: "/kaggle/input/my-video-dataset/sample.mp4"
+
+if KAGGLE_INPUT_VIDEO and os.path.exists(KAGGLE_INPUT_VIDEO):
+    os.makedirs("downloads/video", exist_ok=True)
+    target_path = os.path.join("downloads/video", os.path.basename(KAGGLE_INPUT_VIDEO))
+    shutil.copy(KAGGLE_INPUT_VIDEO, target_path)
+    print(f"✅ Video copied successfully to: {target_path}")
+
+# Option B: Interactive Browser File Uploader Widget inside Kaggle Notebook
+from IPython.display import HTML, display
+
+uploader_html = """
+<div style="border: 2px dashed #6366f1; padding: 20px; text-align: center; border-radius: 12px; background: rgba(99, 102, 241, 0.05); font-family: sans-serif;">
+    <h3 style="margin-top:0; color: #4f46e5;">🎬 Upload Local Video File directly to AutoVideo</h3>
+    <p style="color: #6b7280; font-size: 0.9rem;">Select an MP4, MOV, or MKV video file from your computer:</p>
+    <input type="file" id="localVideoFile" accept="video/*" style="margin: 10px 0; padding: 6px; border: 1px solid #ccc; border-radius: 6px;">
+    <br>
+    <button onclick="uploadVideoToAutoVideo()" style="background: #4f46e5; color: white; border: none; padding: 10px 24px; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 10px;">🚀 Upload Video</button>
+    <p id="uploadStatusMsg" style="margin-top: 12px; font-weight: bold;"></p>
+</div>
+
+<script>
+async function uploadVideoToAutoVideo() {
+    const input = document.getElementById('localVideoFile');
+    const status = document.getElementById('uploadStatusMsg');
+    if (!input.files.length) {
+        status.innerText = '❌ Please select a video file first!';
+        status.style.color = '#ef4444';
+        return;
+    }
+    const file = input.files[0];
+    const formData = new FormData();
+    formData.append('file', file);
+    status.innerText = '⏳ Uploading ' + file.name + ' (' + (file.size / (1024*1024)).toFixed(1) + ' MB)... Please wait!';
+    status.style.color = '#4f46e5';
+    try {
+        const res = await fetch('/api/upload', {
+            method: 'POST',
+            body: formData
+        });
+        const data = await res.json();
+        if (data.status === 'success') {
+            status.innerText = '✅ Uploaded successfully! Saved at: ' + data.video_path;
+            status.style.color = '#10b981';
+        } else {
+            status.innerText = '❌ Upload failed!';
+            status.style.color = '#ef4444';
+        }
+    } catch(e) {
+        status.innerText = '⚠️ Note: You can also use the Cloudflare Public Web UI link (Cell 4) to upload videos!';
+        status.style.color = '#f59e0b';
+    }
+}
+</script>
+"""
+display(HTML(uploader_html))
+
+
+--------------------------------------------------------------------------------
 CELL 4: Launch Web UI with Reliable Cloudflare Tunnel (Fixed DNS & Wait Time)
 --------------------------------------------------------------------------------
 # [CELL 4 - CODE]
