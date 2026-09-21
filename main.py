@@ -6,9 +6,9 @@ import asyncio
 import json
 from pathlib import Path
 from typing import List, Dict, Optional, Any
-from fastapi import FastAPI, HTTPException, status, UploadFile, File, Form, Header
+from fastapi import FastAPI, HTTPException, status, UploadFile, File, Form, Header, Request, Query
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse, HTMLResponse, StreamingResponse
+from fastapi.responses import FileResponse, HTMLResponse, StreamingResponse, JSONResponse
 from pydantic import BaseModel
 import yt_dlp
 from dotenv import load_dotenv
@@ -1141,14 +1141,17 @@ async def add_custom_voice_reference(
 
 class AddQueueRequest(BaseModel):
     url: str
+    mode: Optional[str] = "recap"
+    client_id: Optional[str] = None
 
 
 @app.post("/api/queue/add")
-def add_video_to_queue(req: AddQueueRequest):
-    """Adds a new video URL to the automated processing queue."""
+def add_video_to_queue(req: AddQueueRequest, request: Request):
+    """Adds a new video URL to the automated processing queue tagged with mode and client session ID."""
     qm = QueueManager.get_instance()
+    client_id = req.client_id or request.headers.get("x-client-id")
     try:
-        job = qm.add_job(req.url)
+        job = qm.add_job(req.url, mode=req.mode, client_id=client_id)
         return {
             "status": "success",
             "message": "Video added to background queue.",
@@ -1161,10 +1164,17 @@ def add_video_to_queue(req: AddQueueRequest):
 
 
 @app.get("/api/queue")
-def get_queue_jobs():
-    """Returns all queued, processing, completed, and failed jobs."""
+def get_queue_jobs(request: Request, client_id: Optional[str] = Query(None)):
+    """Returns all queued, processing, completed, and failed jobs filtered by client session ID."""
+    header_client_id = request.headers.get("x-client-id")
+    effective_client_id = client_id or header_client_id
     qm = QueueManager.get_instance()
-    return [job.model_dump() for job in qm.get_all_jobs()]
+    jobs = qm.get_all_jobs(client_id=effective_client_id)
+    response = JSONResponse(content=[job.model_dump() for job in jobs])
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    return response
 
 
 @app.post("/api/queue/cancel/{job_id}")

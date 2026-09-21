@@ -1752,10 +1752,21 @@
             }
         }
 
+        // Session Client ID Generator / Retriever
+        function getClientId() {
+            let cid = localStorage.getItem("autovideo_client_id");
+            if (!cid) {
+                cid = "client_" + Math.random().toString(36).substring(2, 10) + Date.now().toString(36);
+                localStorage.setItem("autovideo_client_id", cid);
+            }
+            return cid;
+        }
+
         // SSE Real-time Updates
         function connectSSE() {
             if (eventSource) eventSource.close();
-            eventSource = new EventSource("/api/queue/stream");
+            const cid = getClientId();
+            eventSource = new EventSource("/api/queue/stream?client_id=" + encodeURIComponent(cid));
 
             eventSource.onmessage = (e) => {
                 try {
@@ -1782,7 +1793,9 @@
 
         async function fetchQueueJobs() {
             try {
-                const res = await fetch("/api/queue");
+                const res = await fetch("/api/queue", {
+                    headers: { "X-Client-ID": getClientId() }
+                });
                 if (res.ok) {
                     allJobs = await res.json();
                     renderQueueDashboard();
@@ -1980,8 +1993,11 @@
             try {
                 const res = await fetch("/api/queue/add", {
                     method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ url: url, mode: currentPipelineMode })
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-Client-ID": getClientId()
+                    },
+                    body: JSON.stringify({ url: url, mode: currentPipelineMode, client_id: getClientId() })
                 });
                 const data = await res.json();
                 if (res.ok && data.status === "success") {

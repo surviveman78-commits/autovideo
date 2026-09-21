@@ -34,6 +34,8 @@ class Job(BaseModel):
     output_video_path: Optional[str] = None
     output_srt_path: Optional[str] = None
     settings_snapshot: Optional[Dict[str, Any]] = None
+    mode: Optional[str] = "recap"
+    client_id: Optional[str] = None
 
 
 def normalize_url(url: str) -> str:
@@ -105,9 +107,11 @@ class QueueManager:
         if recovered_count > 0:
             self.save_queue()
 
-    def get_all_jobs(self) -> List[Job]:
+    def get_all_jobs(self, client_id: Optional[str] = None) -> List[Job]:
         with QUEUE_LOCK:
             sorted_jobs = sorted(self.jobs.values(), key=lambda j: j.created_at, reverse=True)
+            if client_id:
+                return [j for j in sorted_jobs if j.client_id == client_id or not j.client_id]
             return sorted_jobs
 
     def get_job(self, job_id: str) -> Optional[Job]:
@@ -124,7 +128,7 @@ class QueueManager:
                         return True
         return False
 
-    def add_job(self, url: str) -> Job:
+    def add_job(self, url: str, mode: Optional[str] = "recap", client_id: Optional[str] = None) -> Job:
         clean_url = url.strip()
         if not clean_url:
             raise ValueError("Video URL cannot be empty.")
@@ -134,6 +138,9 @@ class QueueManager:
 
         job_id = f"{time.strftime('%Y%m%d')}_{uuid.uuid4().hex[:6]}"
         settings = SettingsManager.get_instance().load_settings()
+        snapshot = settings.model_dump()
+        if mode:
+            snapshot["mode"] = mode
 
         job = Job(
             job_id=job_id,
@@ -143,7 +150,9 @@ class QueueManager:
             progress=0,
             stage_message="Queued in processing line",
             max_retries=settings.max_retries,
-            settings_snapshot=settings.model_dump()
+            settings_snapshot=snapshot,
+            mode=mode or "recap",
+            client_id=client_id
         )
 
         with QUEUE_LOCK:
@@ -155,7 +164,8 @@ class QueueManager:
             "job_id": job_id,
             "status": "QUEUED",
             "progress": 0,
-            "stage_message": "Queued in processing line"
+            "stage_message": "Queued in processing line",
+            "client_id": client_id
         })
 
         return job
